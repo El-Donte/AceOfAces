@@ -3,59 +3,87 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
-namespace AceOfAces.Models
+
+namespace AceOfAces.Models;
+
+public class MissileModel : GameObjectModel
 {
-    public class MissileModel : GameObjectModel
+    private float _lifespan = 5f;
+    public readonly float ArrivalTreshold = 100f;
+    public readonly float PredictedTime = 0.2f;
+
+    #region Speed
+    private float _speed = 800f;
+    public float Speed => _speed;
+
+    private Vector2 _velocity;
+    public Vector2 Velocity => _velocity;
+    #endregion
+
+    #region Rotation
+    private float _rotationSpeed = 8f;
+    public float RotationSpeed => _rotationSpeed;
+
+    protected float _rotation;
+    public float Rotation => _rotation; // Угол поворота
+    #endregion
+
+    #region Damage
+    private readonly int _damage = 50;
+    public int Damage => _damage;
+    #endregion
+
+    #region Target
+    private ITarget _target;
+    public ITarget Target => _target;
+
+    private GameObjectType _source;
+    public GameObjectType Source => GameObjectType.Player;
+    #endregion
+
+
+    public MissileModel(Texture2D texture, Vector2 position) : base(texture, position)
     {
-        private readonly int _damage = 50;
-        private float _lifespan = 5f;
-        private float _speed = 500f;
-        private float _rotationSpeed = 3f;
-        private GameObjectModel _target;
-        private GameObjectType _source;
+        _collider = new CollisionModel(GetBounds(), GameObjectType.Missile);
+    }
 
-        public Vector2 Direction { get; set; }
-        public float Lifespan => _lifespan;
-        
-        public int Damage => _damage;
-        public GameObjectModel Target => _target;
-        public GameObjectType Source => GameObjectType.Player;
+    public override void Move(Vector2 direction, float deltaTime)
+    {
+        SetVelocity(direction, deltaTime);
+        _position += _velocity * deltaTime;
 
-        public MissileModel(Texture2D texture, Vector2 position) : base(texture, position)
+        _collider.UpdateBounds(GetBounds());
+    }
+
+    public override void Rotate(Vector2 inputDirection, float deltaTime)
+    {
+        if (_velocity.LengthSquared() > 0.1f)
         {
-            _collider = new CollisionModel(GetBounds(), GameObjectType.Missile);
-        }
-
-        public override void Move(Vector2 direction, float deltaTime)
-        {
-            _position += direction * _speed * deltaTime;
-
-            _collider.UpdateBounds(GetBounds());
-        }
-
-        public override void Rotate(Vector2 inputDirection, float deltaTime)
-        {
-            // Нормализуем углы
-            float difference = inputDirection.X - _rotation;
-            while (difference < -Math.PI) difference += MathHelper.TwoPi;
-            while (difference > Math.PI) difference -= MathHelper.TwoPi;
-
-            // Плавное изменение угла
-            _rotation += MathHelper.Clamp(difference, -_rotationSpeed * deltaTime, _rotationSpeed * deltaTime);
-        }
-
-        public void UpdateLifeSpan(float deltaTime)
-        {
-            //_lifespan -= deltaTime;
-            //if (_lifespan < 0f)
-            //{
-            //    Dispose();
-            //}
-        }
-
-        public void SetTarget(GameObjectModel target)
-        {
-            _target = target;
+            _rotation = (float)Math.Atan2(_velocity.Y, _velocity.X);
         }
     }
+
+    private void SetVelocity(Vector2 direction, float deltaTime)
+    {
+        _velocity += direction * deltaTime;
+        if (_velocity.Length() > _speed)
+        {
+            _velocity = Vector2.Normalize(_velocity) * _speed;
+        }
+    }
+
+    public void UpdateLifeSpan(float deltaTime)
+    {
+        _lifespan -= deltaTime;
+        if (_lifespan < 0f)
+        {
+            Dispose();
+        }
+    }
+
+    public void SetTarget(ITarget target)
+    {
+        _target = target;
+    }
 }
+

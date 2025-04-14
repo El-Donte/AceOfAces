@@ -2,33 +2,33 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace AceOfAces.Views
+namespace AceOfAces.Views;
+
+public class MissilesView : IView
 {
-    public class MissilesView : IView
+    private readonly MissileList _missileList;
+    public SpriteBatch SpriteBatch { get; set; }
+
+    public MissilesView(MissileList missileList)
     {
-        private readonly MissileList _missileList;
-        public SpriteBatch SpriteBatch { get; set; }
+        _missileList = missileList;
+    }
 
-        public MissilesView(MissileList missileList)
+    public void Draw()
+    {
+        foreach (var missile in _missileList.Missiles)
         {
-            _missileList = missileList;
-        }
-
-        public void Draw()
-        {
-            foreach (var missile in _missileList.Missiles)
-            {
-                SpriteBatch.Draw(
-                    missile.Texture,
-                    missile.Position,
-                    null,
-                    Color.White,
-                    missile.Rotation + MathHelper.PiOver2,
-                    missile.Origin,
-                    1,
-                    SpriteEffects.None,
-                    0f);
-            }
+            SpriteBatch.Draw(
+                missile.Texture,
+                missile.Position,
+                null,
+                Color.White,
+                missile.Rotation + MathHelper.PiOver2,
+                missile.Origin,
+                1,
+                SpriteEffects.None,
+                0f);
         }
     }
 }
+

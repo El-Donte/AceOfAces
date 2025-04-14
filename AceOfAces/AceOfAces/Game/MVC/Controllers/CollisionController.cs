@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 
 namespace AceOfAces.Controllers;
+
 public class CollisionController : IController
 {
     private const float COLLISION_COOLDOWN = 1f;

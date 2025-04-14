@@ -3,79 +3,78 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 
-namespace AceOfAces.Core
+namespace AceOfAces.Core;
+
+public class Grid
 {
-    public class Grid
+    private int _width;
+    private int _height;
+    private readonly int _cellSize;
+    private GameObjectModel[,] _cells;
+    private readonly GraphicsDeviceManager _graphics;
+    private Vector2 _gridWorldPosition;
+
+    public Vector2 GridWorldPosition => _gridWorldPosition;
+    public int CellSize => _cellSize;
+    public int Width => _width;
+    public int Height => _height;
+
+    public Grid(int cellSize, GraphicsDeviceManager graphics)
     {
-        private int _width;
-        private int _height;
-        private readonly int _cellSize;
-        private GameObjectModel[,] _cells;
-        private readonly GraphicsDeviceManager _graphics;
-        private Vector2 _gridWorldPosition;
+        _cellSize = cellSize;
+        _graphics = graphics;
+    }
 
-        public Vector2 GridWorldPosition => _gridWorldPosition;
-        public int CellSize => _cellSize;
-        public int Width => _width;
-        public int Height => _height;
+    private void UpdateGridWidthHeight()
+    {
+        _width = (int)Math.Ceiling((float)_graphics.GraphicsDevice.Viewport.Width / _cellSize) + 1;
+        _height = (int)Math.Ceiling((float)_graphics.GraphicsDevice.Viewport.Height / _cellSize) + 1;
+        _cells = new GameObjectModel[_width, _height];
+    }
 
-        public Grid(int cellSize, GraphicsDeviceManager graphics)
+    public void UpdateGridPosition(Vector2 playerPosition)
+    {
+        UpdateGridWidthHeight();
+        _gridWorldPosition = new Vector2(
+            playerPosition.X - (_width * _cellSize) / 2f,
+            playerPosition.Y - (_height * _cellSize) / 2f
+        );
+    }
+
+    public void AddObject(GameObjectModel obj)
+    {
+        Vector2 relativePos = obj.Position - _gridWorldPosition;
+
+        int x = (int)(relativePos.X / _cellSize);
+        int y = (int)(relativePos.Y / _cellSize);
+
+        if (x >= 0 && x < _width && y >= 0 && y < _height)
         {
-            _cellSize = cellSize;
-            _graphics = graphics;
+            _cells[x, y] = obj;
         }
+    }
 
-        private void UpdateGridWidthHeight()
+    public List<GameObjectModel> GetNearbyObjects(Vector2 objectPosition)
+    {
+        var result = new List<GameObjectModel>();
+        int radius = Math.Max(_width, _height);
+        int centerX = _width / 2;
+        int centerY = _height / 2;
+
+        for (int x = centerX - radius; x <= centerX + radius; x++)
         {
-            _width = (int)Math.Ceiling((float)_graphics.GraphicsDevice.Viewport.Width / _cellSize) + 1;
-            _height = (int)Math.Ceiling((float)_graphics.GraphicsDevice.Viewport.Height / _cellSize) + 1;
-            _cells = new GameObjectModel[_width, _height];
-        }
-
-        public void UpdateGridPosition(Vector2 playerPosition)
-        {
-            UpdateGridWidthHeight();
-            _gridWorldPosition = new Vector2(
-                playerPosition.X - (_width * _cellSize) / 2f,
-                playerPosition.Y - (_height * _cellSize) / 2f
-            );
-        }
-
-        public void AddObject(GameObjectModel obj)
-        {
-            Vector2 relativePos = obj.Position - _gridWorldPosition;
-
-            int x = (int)(relativePos.X / _cellSize);
-            int y = (int)(relativePos.Y / _cellSize);
-
-            if (x >= 0 && x < _width && y >= 0 && y < _height)
+            for (int y = centerY - radius; y <= centerY + radius; y++)
             {
-                _cells[x, y] = obj;
-            }
-        }
-
-        public List<GameObjectModel> GetNearbyObjects(Vector2 objectPosition)
-        {
-            var result = new List<GameObjectModel>();
-            int radius = Math.Max(_width, _height);
-            int centerX = _width / 2;
-            int centerY = _height / 2;
-
-            for (int x = centerX - radius; x <= centerX + radius; x++)
-            {
-                for (int y = centerY - radius; y <= centerY + radius; y++)
+                if (x >= 0 && x < _width && y >= 0 && y < _height)
                 {
-                    if (x >= 0 && x < _width && y >= 0 && y < _height)
+                    if (_cells[x, y] != null)
                     {
-                        if (_cells[x, y] != null)
-                        {
-                            result.Add(_cells[x, y]);
-                        }
+                        result.Add(_cells[x, y]);
                     }
                 }
             }
-
-            return result;
         }
+
+        return result;
     }
 }

@@ -1,7 +1,7 @@
-﻿namespace AceOfAces.Controllers
+﻿namespace AceOfAces.Controllers;
+
+interface IController
 {
-    interface IController
-    {
-        void Update(float deltaTime);
-    }
+    void Update(float deltaTime);
 }
+

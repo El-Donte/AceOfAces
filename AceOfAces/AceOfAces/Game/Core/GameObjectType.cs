@@ -1,9 +1,9 @@
-﻿namespace AceOfAces.Core
+﻿namespace AceOfAces.Core;
+
+public enum GameObjectType
 {
-    public enum GameObjectType
-    {
-        Player,
-        Enemy,
-        Missile
-    }
+    Player,
+    Enemy,
+    Missile
 }
+

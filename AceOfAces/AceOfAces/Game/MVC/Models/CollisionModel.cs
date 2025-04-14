@@ -1,22 +1,22 @@
 ﻿using AceOfAces.Core;
 using Microsoft.Xna.Framework;
 
-namespace AceOfAces.Models
+namespace AceOfAces.Models;
+
+public class CollisionModel
 {
-    public class CollisionModel
+    public Rectangle Bounds { get; private set; }
+    public GameObjectType ObjectType { get; set; }
+
+    public CollisionModel(Rectangle bounds, GameObjectType type)
     {
-        public Rectangle Bounds { get; private set; }
-        public GameObjectType ObjectType { get; set; }
+        Bounds = bounds;
+        ObjectType = type;
+    }
 
-        public CollisionModel(Rectangle bounds, GameObjectType type)
-        {
-            Bounds = bounds;
-            ObjectType = type;
-        }
-
-        public void UpdateBounds(Rectangle newBounds)
-        {
-            Bounds = newBounds;
-        }
+    public void UpdateBounds(Rectangle newBounds)
+    {
+        Bounds = newBounds;
     }
 }
+

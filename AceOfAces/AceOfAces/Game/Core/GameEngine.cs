@@ -3,49 +3,48 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
+namespace AceOfAces.Core;
 
-namespace AceOfAces.Core
+public class GameEngine : Game
 {
-    public class GameEngine : Microsoft.Xna.Framework.Game
+    private readonly GraphicsDeviceManager _graphics;
+    private GameManager _gameManager;
+
+    public GameEngine()
     {
-        private readonly GraphicsDeviceManager _graphics;
-        private GameManager _gameManager;
+        _graphics = new GraphicsDeviceManager(this);
+        Content.RootDirectory = "Content";
+        IsMouseVisible = true;
+    }
 
-        public GameEngine()
-        {
-            _graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Content";
-            IsMouseVisible = true;
-        }
+    protected override void Initialize()
+    {
+        _graphics.PreferredBackBufferWidth = /*1920;*/  1024;
+        _graphics.PreferredBackBufferHeight = /*1920;*/ 764;
+        _graphics.ApplyChanges();
 
-        protected override void Initialize()
-        {
-            _graphics.PreferredBackBufferWidth = /*1920;*/  1024;
-            _graphics.PreferredBackBufferHeight = /*1920;*/ 764;
-            _graphics.ApplyChanges();
+        _gameManager = new GameManager(_graphics,Content);
 
-            _gameManager = new GameManager(_graphics,Content);
+        base.Initialize();
+    }
 
-            base.Initialize();
-        }
+    protected override void Update(GameTime gameTime)
+    {
+        if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            Exit();
 
-        protected override void Update(GameTime gameTime)
-        {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+        _gameManager.Update(gameTime);
 
-            _gameManager.Update(gameTime);
+        base.Update(gameTime);
+    }
 
-            base.Update(gameTime);
-        }
+    protected override void Draw(GameTime gameTime)
+    {
+        GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        protected override void Draw(GameTime gameTime)
-        {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+        _gameManager.Draw();
 
-            _gameManager.Draw();
-
-            base.Draw(gameTime);
-        }
+        base.Draw(gameTime);
     }
 }
+

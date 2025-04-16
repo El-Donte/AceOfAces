@@ -1,16 +1,16 @@
 ﻿using AceOfAces.Core;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-
 
 namespace AceOfAces.Models;
 
 public class MissileModel : GameObjectModel
 {
-    private float _lifespan = 5f;
+    public static Texture2D MissleTexture { get; set; }
+
     public readonly float ArrivalTreshold = 100f;
     public readonly float PredictedTime = 0.2f;
+    private float _lifespan = 5f;
 
     #region Speed
     private float _speed = 800f;
@@ -41,41 +41,35 @@ public class MissileModel : GameObjectModel
     public GameObjectType Source => GameObjectType.Player;
     #endregion
 
-
-    public MissileModel(Texture2D texture, Vector2 position) : base(texture, position)
+    public MissileModel(Vector2 position) : base(MissleTexture, position)
     {
         _collider = new CollisionModel(GetBounds(), GameObjectType.Missile);
     }
 
-    public override void Move(Vector2 direction, float deltaTime)
+    public void SetPosition(Vector2 position)
     {
-        SetVelocity(direction, deltaTime);
-        _position += _velocity * deltaTime;
-
+        _position += position;
         _collider.UpdateBounds(GetBounds());
     }
 
-    public override void Rotate(Vector2 inputDirection, float deltaTime)
+    public void SetRotation(float rotation)
     {
-        if (_velocity.LengthSquared() > 0.1f)
-        {
-            _rotation = (float)Math.Atan2(_velocity.Y, _velocity.X);
-        }
+        _rotation = rotation;
     }
 
-    private void SetVelocity(Vector2 direction, float deltaTime)
+    public void SetVelocity(Vector2 velocity)
     {
-        _velocity += direction * deltaTime;
+        _velocity += velocity;
         if (_velocity.Length() > _speed)
         {
             _velocity = Vector2.Normalize(_velocity) * _speed;
         }
     }
 
-    public void UpdateLifeSpan(float deltaTime)
+    public void ReduceLifespan(float deltaTime)
     {
         _lifespan -= deltaTime;
-        if (_lifespan < 0f)
+        if (_lifespan <= 0)
         {
             Dispose();
         }

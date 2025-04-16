@@ -1,5 +1,5 @@
-﻿using AceOfAces.Core;
-using AceOfAces.Controllers;
+﻿using AceOfAces.Controllers;
+using AceOfAces.Core;
 using AceOfAces.Models;
 using AceOfAces.Views;
 using Microsoft.Xna.Framework;
@@ -25,7 +25,7 @@ public class GameManager
 
     private PlayerModel _playerModel;
     private EnemyModel enemyModel;
-    private MissileList missles;
+    private MissileListModel missles;
     public static bool isDebug;
 
     public GameManager(GraphicsDeviceManager graphics, ContentManager content)
@@ -43,20 +43,32 @@ public class GameManager
         _playerModel = new PlayerModel(_contentManager.Load<Texture2D>("jets/jet"), new(_viewport.Width / 2, _viewport.Height / 2));
         enemyModel = new EnemyModel(_contentManager.Load<Texture2D>("jets/jet"), Vector2.Zero);
         var layers = new List<BackgroundModel> {
-            new BackgroundModel(_contentManager.Load<Texture2D>($"Clouds/Clouds1"), 0.6f, 0.5f, _viewport),
-            new BackgroundModel(_contentManager.Load<Texture2D>($"Clouds/Clouds2"), 0.8f, 1f, _viewport),
-            new BackgroundModel(_contentManager.Load<Texture2D>($"Clouds/Clouds3"), 1.1f, 1.4f, _viewport)
+            new BackgroundModel(_contentManager.Load<Texture2D>("Clouds/Clouds1"), 0.6f, 0.5f, _viewport),
+            new BackgroundModel(_contentManager.Load<Texture2D>("Clouds/Clouds2"), 0.8f, 1f, _viewport),
+            new BackgroundModel(_contentManager.Load<Texture2D>("Clouds/Clouds3"), 1.1f, 1.4f, _viewport)
         };
 
-        missles = new MissileList(_contentManager.Load<Texture2D>("missile"),_playerModel);
+        MissileModel.MissleTexture = _contentManager.Load<Texture2D>("missile");
+
+        var missileCooldownTexture = _contentManager.Load<Texture2D>("missileCooldown");
+        //var font = _contentManager.Load<SpriteFont>("Fonts/font");
+
+        var _cooldowns = new List<MissileCooldownModel>();
+        for (int i = 0; i < 2; i++)
+        {
+            _cooldowns.Add(new MissileCooldownModel(3f));
+        }
+
+        missles = new MissileListModel(_cooldowns);
         _models.Add(_playerModel);
         _models.Add(enemyModel);
         #endregion
 
         #region Controllers
         var _collisionController = new CollisionController(_grid,_playerModel,missles,new List<EnemyModel>() { enemyModel });
+        var playerController = new PlayerController(_playerModel, missles, enemyModel);
 
-        _controllers.Add(new PlayerController(_playerModel, missles));
+        _controllers.Add(playerController);
         _controllers.Add(new BackGroundController(layers, _playerModel));
         _controllers.Add(new MissileController(missles));
         _controllers.Add(_collisionController);
@@ -67,6 +79,19 @@ public class GameManager
         _views.Add(new EnemyView(enemyModel) { SpriteBatch = _spriteBatch });
         _views.Add(new PlayerView(_playerModel) {SpriteBatch = _spriteBatch});
         _views.Add(new MissilesView(missles) { SpriteBatch = _spriteBatch });
+        
+            
+        for (int i = 0; i < 2; i++)
+        {
+            var screenMargin = new Vector2(20 + 60 * i, 50);
+            var bar  = new CooldownBarView(
+                    model: missles.Cooldowns[i],
+                    texture: missileCooldownTexture,
+                    screenMargin: screenMargin
+                )
+            { Camera = camera2D, GraphicsDevice = _graphicsManager.GraphicsDevice, SpriteBatch = _spriteBatch };
+            _views.Add(bar);
+        }
         #endregion
     }
 
@@ -77,7 +102,6 @@ public class GameManager
         foreach (var controller in _controllers)
         {
             controller.Update(gameTime);
-            enemyModel.Move(new Vector2(1, 0), gameTime);
         }
 
         camera2D.Position = _playerModel.Position;
@@ -85,7 +109,7 @@ public class GameManager
 
     public void Draw()
     {
-        _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.LinearWrap, null, transformMatrix: camera2D.Transform);
+        _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.LinearWrap, null, transformMatrix: camera2D.TransformMatrix);
 
         foreach (var view in _views)
         {

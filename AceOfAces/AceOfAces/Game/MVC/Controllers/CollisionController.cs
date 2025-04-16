@@ -7,15 +7,17 @@ namespace AceOfAces.Controllers;
 
 public class CollisionController : IController
 {
-    private const float COLLISION_COOLDOWN = 1f;
-    private readonly PlayerModel _player;
-    private readonly Grid _grid;
     private readonly List<GameObjectModel> _allObjects = new List<GameObjectModel>();
-    private readonly List<EnemyModel> _enemies;
-    private readonly MissileList _missileList;
+    private readonly Grid _grid;
+
+    private const float COLLISION_COOLDOWN = 1f;
     private readonly Dictionary<GameObjectModel, float> _collisionCooldowns = new Dictionary<GameObjectModel, float>();
 
-    public CollisionController(Grid grid, PlayerModel player,MissileList missiles, List<EnemyModel> enemies)
+    private readonly PlayerModel _player;
+    private readonly List<EnemyModel> _enemies;
+    private readonly MissileListModel _missileList;
+
+    public CollisionController(Grid grid, PlayerModel player,MissileListModel missiles, List<EnemyModel> enemies)
     {
         _grid = grid;
         _player = player;
@@ -39,6 +41,7 @@ public class CollisionController : IController
 
         CheckAllCollisions();
     }
+
 
     private void UpdateAllObjects()
     {
@@ -79,7 +82,6 @@ public class CollisionController : IController
     {
         return CanCollideWith(a) && CanCollideWith(b);
     }
-
 
     private bool CanCollideWith(GameObjectModel other)
     {

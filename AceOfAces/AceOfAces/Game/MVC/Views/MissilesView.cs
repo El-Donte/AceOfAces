@@ -6,10 +6,10 @@ namespace AceOfAces.Views;
 
 public class MissilesView : IView
 {
-    private readonly MissileList _missileList;
+    private readonly MissileListModel _missileList;
     public SpriteBatch SpriteBatch { get; set; }
 
-    public MissilesView(MissileList missileList)
+    public MissilesView(MissileListModel missileList)
     {
         _missileList = missileList;
     }

@@ -27,17 +27,6 @@ public class EnemyModel : GameObjectModel, ITarget
         _collider = new CollisionModel(GetBounds(),GameObjectType.Enemy);
     }
 
-    public override void Move(Vector2 direction, float deltaTime)
-    {
-        //_velocity = direction * 100f;
-        //_position += Velocity * deltaTime;
-    }
-
-    public override void Rotate(Vector2 inputDirection, float deltaTime)
-    {
-        throw new NotImplementedException();
-    }
-
     public void TakeDamage(int damage)
     {
         _health -= damage;

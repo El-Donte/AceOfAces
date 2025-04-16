@@ -6,7 +6,7 @@ namespace AceOfAces.Models;
 public class CollisionModel
 {
     public Rectangle Bounds { get; private set; }
-    public GameObjectType ObjectType { get; set; }
+    public GameObjectType ObjectType { get; private set; }
 
     public CollisionModel(Rectangle bounds, GameObjectType type)
     {

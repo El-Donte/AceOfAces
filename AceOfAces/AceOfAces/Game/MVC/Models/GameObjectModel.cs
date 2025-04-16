@@ -39,12 +39,8 @@ public abstract class GameObjectModel : IDisposable
         _origin = new Vector2(texture.Width / 2, texture.Height / 2);
     }
 
-    public abstract void Move(Vector2 direction, float deltaTime);
-    public abstract void Rotate(Vector2 inputDirection, float deltaTime);
-
     public void Dispose()
     {
-        Console.WriteLine("Destroyed");
         if (IsDestroyed) return;
 
         _isDestroyed = true;

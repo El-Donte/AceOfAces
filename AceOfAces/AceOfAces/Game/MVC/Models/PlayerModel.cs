@@ -16,6 +16,7 @@ public class PlayerModel : GameObjectModel, ITarget
 
     #region Rotation
     private readonly float _rotationSpeed = 4f;
+    public float RotationSpeed => _rotationSpeed;
 
     protected float _rotation;
     public float Rotation => _rotation; // Угол поворота
@@ -34,15 +35,24 @@ public class PlayerModel : GameObjectModel, ITarget
     private readonly float _maxSpeed = 500f;
     private readonly float _acceleration = 400f;
     private readonly float _decceleration = 100f;
-      
-    public event Action<float> SpeedChanged;
+
+    public float MinSpeed => _minSpeed;
+    public float MaxSpeed => _maxSpeed;
+    public float Decceleration => _decceleration;
+    public float Acceleration => _acceleration;
     #endregion
 
     #region Invulnerability
     private float _invulnerabilityTimer;
+    public float InvulnerabilityTimer
+    {
+        get => _invulnerabilityTimer;
+        set
+        {
+            _invulnerabilityTimer = value;
+        }
+    }
     public bool IsInvulnerable => _invulnerabilityTimer > 0; // Находится ли игрок в состоянии неуязвимости
-
-    public event Action<bool> OnInvulnerabilityEnded;
     #endregion
 
     #region Blink
@@ -58,66 +68,31 @@ public class PlayerModel : GameObjectModel, ITarget
             OnBlinkPhaseChanged?.Invoke(_blinkPhase);
         }
     }
-
-        
-    #endregion
-
-    #region Events
-    public event Action<Vector2> PositionChanged;
-    public event Action<Vector2> MovementDirectionChanged;
     #endregion
 
     public PlayerModel(Texture2D texture, Vector2 position) : base(texture, position)
     {
         _collider = new CollisionModel(GetBounds(),GameObjectType.Player);
     }
-
-    public override void Move(Vector2 direction, float deltaTime)
+    public void SetPosition(Vector2 position)
     {
-        _velocity = direction * _currentSpeed;
-        _position +=  Velocity * deltaTime;
-
+        _position += position;
         _collider.UpdateBounds(GetBounds());
-
-        PositionChanged?.Invoke(_position);
-        MovementDirectionChanged?.Invoke(direction);
     }
 
-    public override void Rotate(Vector2 inputDirection, float deltaTime)
+    public void SetRoration(float rotation)
     {
-        _rotation += inputDirection.X * _rotationSpeed * deltaTime;
-        RotationChanged?.Invoke(_rotation);
-    }
-
-    public void ChangeSpeed(int k, bool isBreaking, float deltaTime)
-    {
-        if (isBreaking)
-        {
-            _currentSpeed -= k * _decceleration * deltaTime;
-        }
-        else
-        {
-            _currentSpeed += k * _acceleration * deltaTime;
-        }
-
-        _currentSpeed = MathHelper.Clamp(_currentSpeed, _minSpeed, _maxSpeed);
-        SpeedChanged?.Invoke(_currentSpeed);
-    }
-
-    public void Invulnerable(float deltaTime)
-    {
-        if (!IsInvulnerable)
-        {
-            return;
-        }
-
-        _invulnerabilityTimer -= deltaTime;
+        _rotation += rotation;
     }
 
     public void SetCurrentSpeed(float speed)
     {
-        _currentSpeed = MathHelper.Clamp(speed, _minSpeed, _maxSpeed);
-        SpeedChanged?.Invoke(_currentSpeed);
+        _currentSpeed = speed;
+    }
+
+    public void SetVelocity(Vector2 velocity)
+    {
+        _velocity = velocity;
     }
 
     public void TakeDamage(int damage)

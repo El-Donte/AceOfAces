@@ -29,10 +29,11 @@ public class BackgroundModel
         get
         {
             return new Rectangle((int)_position.X, (int)_position.Y,
-                                (int)(_viewport.Width / Zoom),
-                                (int)(_viewport.Height / Zoom));
+                                (int)(_viewport.Width / _zoom),
+                                (int)(_viewport.Height / _zoom));
         }
     }
+
     public Vector2 Origin => new Vector2(Rectangle.Width / 2, Rectangle.Height / 2);
     #endregion
 
@@ -45,9 +46,9 @@ public class BackgroundModel
         _position = Vector2.Zero;
     }
 
-    public void Move(Vector2 direction, float deltaTime)
+    public void SetPosition(Vector2 position)
     {
-        _position += direction * SpeedKoeff * deltaTime;
+        _position += position;
     }
 }
 

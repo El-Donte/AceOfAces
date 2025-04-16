@@ -8,16 +8,16 @@ namespace AceOfAces.Controllers;
 
 public class PlayerController : IController
 {
+    private readonly MissileListModel _missiles;
     private readonly PlayerModel _model;
-    private readonly MissileList _missiles;
-
     private Vector2 _inputDirection;
+    private EnemyModel _enemy;
 
-    public PlayerController(PlayerModel playerModel,MissileList missileController)
+    public PlayerController(PlayerModel playerModel,MissileListModel missileList, EnemyModel enemyModel)
     {
         _model = playerModel;
-        _missiles = missileController;
-
+        _missiles = missileList;
+        _enemy = enemyModel;
         _model.Destroyed += OnPlayerDestroyed;
         _model.OnDamaged += StartBlinkingEffect;
     }
@@ -27,38 +27,57 @@ public class PlayerController : IController
         InputUpdate();
         UpdateMovement(deltaTime);
         UpdateBlinking();
-        _model.Invulnerable(deltaTime);
+        UpdateInvurTimer(deltaTime);
     }
 
     private void UpdateMovement(float deltaTime)
     {
-        _model.Rotate(_inputDirection, deltaTime);
+        var rotation = _inputDirection.X * _model.RotationSpeed * deltaTime;
+        _model.SetRoration(rotation);
 
         Vector2 direction = new Vector2((float)Math.Sin(_model.Rotation), -(float)Math.Cos(_model.Rotation));
 
         if (_inputDirection.Y > 0)
         {
-            _model.ChangeSpeed(1, false, deltaTime);
+            UpdateSpeed(1, false, deltaTime);
         }
         else
         {
             var keyKoeff = _inputDirection.Y < 0 ? 2 : 1;
-            _model.ChangeSpeed(keyKoeff, true, deltaTime);
+            UpdateSpeed(keyKoeff, true, deltaTime);
         }
 
-        _model.Move((_inputDirection.Y + 2) * direction, deltaTime);
+        var velocity = (_inputDirection.Y + 2) * direction * _model.CurrentSpeed;
+        _model.SetVelocity(velocity);
+
+        var position = _model.Velocity * deltaTime;
+        _model.SetPosition(position);
+    }
+
+    private void UpdateSpeed(int k, bool isBreaking, float deltaTime)
+    {
+        var currentSpeed = _model.CurrentSpeed;
+        if (isBreaking)
+        {
+            currentSpeed -= k * _model.Decceleration * deltaTime;
+        }
+        else
+        {
+            currentSpeed += k * _model.Acceleration * deltaTime;
+        }
+
+        currentSpeed = MathHelper.Clamp(currentSpeed, _model.MinSpeed, _model.MaxSpeed);
+        _model.SetCurrentSpeed(currentSpeed);
     }
 
     private void InputUpdate()
     {
         InputManager.Update();
         _inputDirection = InputManager.InputDirection;
-        if(InputManager.IsKeyPressed(Keys.Space)) Fire();
-    }
-
-    private void Fire()
-    {
-        _missiles.AddMissile(_model.Position);
+        if (InputManager.IsKeyPressed(Keys.Space))
+        {
+            _missiles.CreatMissile(_model.Position, _enemy);
+        }
     }
 
     private void UpdateBlinking()
@@ -67,6 +86,16 @@ public class PlayerController : IController
         {
             _model.BlinkPhase += 5f;
         }
+    }
+
+    private void UpdateInvurTimer(float deltaTime)
+    {
+        if (!_model.IsInvulnerable)
+        {
+            return;
+        }
+
+        _model.InvulnerabilityTimer -= deltaTime;
     }
 
     private void StartBlinkingEffect(bool isInvulnerable)

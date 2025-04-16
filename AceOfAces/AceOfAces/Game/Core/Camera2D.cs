@@ -9,7 +9,7 @@ public class Camera2d
     public float Zoom { get; set; }
     public float Rotation { get; set; }
     public Vector2 Position { get; set; }
-    public Matrix Transform => GetTranformation();
+    public Matrix TransformMatrix => GetTranformation();
 
     public Camera2d(Viewport viewport)
     {

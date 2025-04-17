@@ -5,6 +5,8 @@ using AceOfAces.Views;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using SharpDX.Direct3D9;
+using System;
 using System.Collections.Generic;
 using SamplerState = Microsoft.Xna.Framework.Graphics.SamplerState;
 
@@ -42,6 +44,7 @@ public class GameManager
         #region Models
         _playerModel = new PlayerModel(_contentManager.Load<Texture2D>("jets/jet"), new(_viewport.Width / 2, _viewport.Height / 2));
         enemyModel = new EnemyModel(_contentManager.Load<Texture2D>("jets/jet"), Vector2.Zero);
+
         var layers = new List<BackgroundModel> {
             new BackgroundModel(_contentManager.Load<Texture2D>("Clouds/Clouds1"), 0.6f, 0.5f, _viewport),
             new BackgroundModel(_contentManager.Load<Texture2D>("Clouds/Clouds2"), 0.8f, 1f, _viewport),
@@ -111,6 +114,36 @@ public class GameManager
     {
         _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.LinearWrap, null, transformMatrix: camera2D.TransformMatrix);
 
+        
+
+        Vector2 PointLocalOffset = new Vector2(30, 0);
+        Vector2 rotatedOffset = new Vector2(
+            PointLocalOffset.X * (float)Math.Cos(_playerModel.Rotation) - PointLocalOffset.Y * (float)Math.Sin(_playerModel.Rotation),
+            PointLocalOffset.X * (float)Math.Sin(_playerModel.Rotation) + PointLocalOffset.Y * (float)Math.Cos(_playerModel.Rotation)
+        );
+
+        _spriteBatch.Draw(
+            MissileModel.MissleTexture,
+            _playerModel.Position + rotatedOffset,
+            null,
+            Color.White,
+            _playerModel.Rotation,
+            new(MissileModel.MissleTexture.Width / 2, MissileModel.MissleTexture.Height / 2),
+            1f,
+            SpriteEffects.None,
+            0f);
+
+        _spriteBatch.Draw(
+            MissileModel.MissleTexture,
+            _playerModel.Position - rotatedOffset,
+            null,
+            Color.White,
+            _playerModel.Rotation,
+            new (MissileModel.MissleTexture.Width/2, MissileModel.MissleTexture.Height/2),
+            1f,
+            SpriteEffects.None,
+            0f);
+
         foreach (var view in _views)
         {
             view.Draw();
@@ -133,5 +166,6 @@ public class GameManager
 
         _spriteBatch.End();
     }
+
 }
 

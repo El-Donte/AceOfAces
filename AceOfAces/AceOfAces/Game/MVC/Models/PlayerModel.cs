@@ -77,6 +77,7 @@ public class PlayerModel : GameObjectModel, ITarget
     public void SetPosition(Vector2 position)
     {
         _position += position;
+        Console.WriteLine(_position);
         _collider.UpdateBounds(GetBounds());
     }
 
@@ -93,6 +94,16 @@ public class PlayerModel : GameObjectModel, ITarget
     public void SetVelocity(Vector2 velocity)
     {
         _velocity = velocity;
+    }
+
+    public Vector2 GetMissilePosition()
+    {
+        Vector2 PointLocalOffset = new Vector2(30, 0);
+        Vector2 rotatedOffset = new Vector2(
+            PointLocalOffset.X * (float)Math.Cos(Rotation) - PointLocalOffset.Y * (float)Math.Sin(Rotation),
+            PointLocalOffset.X * (float)Math.Sin(Rotation) + PointLocalOffset.Y * (float)Math.Cos(Rotation)
+        );
+        return rotatedOffset;
     }
 
     public void TakeDamage(int damage)

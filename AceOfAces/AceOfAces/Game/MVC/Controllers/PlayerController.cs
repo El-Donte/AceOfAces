@@ -13,6 +13,8 @@ public class PlayerController : IController
     private Vector2 _inputDirection;
     private EnemyModel _enemy;
 
+    int missilecount = 0;
+
     public PlayerController(PlayerModel playerModel,MissileListModel missileList, EnemyModel enemyModel)
     {
         _model = playerModel;
@@ -28,6 +30,7 @@ public class PlayerController : IController
         UpdateMovement(deltaTime);
         UpdateBlinking();
         UpdateInvurTimer(deltaTime);
+        Fire();
     }
 
     private void UpdateMovement(float deltaTime)
@@ -74,9 +77,27 @@ public class PlayerController : IController
     {
         InputManager.Update();
         _inputDirection = InputManager.InputDirection;
+    }
+
+    private void Fire()
+    {
+        
         if (InputManager.IsKeyPressed(Keys.Space))
         {
-            _missiles.CreatMissile(_model.Position, _enemy);
+            if(missilecount % 2 == 0)
+            {
+                _missiles.CreatMissile(_model.Position - _model.GetMissilePosition(), _enemy, Core.GameObjectType.Player);
+                missilecount++;
+            }
+            else {
+                _missiles.CreatMissile(_model.Position + _model.GetMissilePosition(), _enemy, Core.GameObjectType.Player);
+                missilecount++;
+            }
+
+            if(missilecount == 2)
+            {
+                missilecount = 0;
+            }
         }
     }
 

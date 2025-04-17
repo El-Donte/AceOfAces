@@ -7,16 +7,19 @@ namespace AceOfAces.Core;
 
 public class Grid
 {
-    private int _width;
-    private int _height;
-    private readonly int _cellSize;
-    private GameObjectModel[,] _cells;
     private readonly GraphicsDeviceManager _graphics;
-    private Vector2 _gridWorldPosition;
+    private GameObjectModel[,] _cells;
 
+    private Vector2 _gridWorldPosition;
     public Vector2 GridWorldPosition => _gridWorldPosition;
+
+    private readonly int _cellSize;
     public int CellSize => _cellSize;
+
+    private int _width;
     public int Width => _width;
+
+    private int _height;
     public int Height => _height;
 
     public Grid(int cellSize, GraphicsDeviceManager graphics)

@@ -36,7 +36,7 @@ public abstract class GameObjectModel : IDisposable
     {
         _texture = texture;
         _position = position;
-        _origin = new Vector2(texture.Width / 2, texture.Height / 2);
+        _origin = new Vector2(texture.Width / 2, texture.Height / 2 + 10);
     }
 
     public void Dispose()

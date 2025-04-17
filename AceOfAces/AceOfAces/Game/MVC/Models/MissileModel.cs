@@ -7,9 +7,6 @@ namespace AceOfAces.Models;
 public class MissileModel : GameObjectModel
 {
     public static Texture2D MissleTexture { get; set; }
-
-    public readonly float ArrivalTreshold = 100f;
-    public readonly float PredictedTime = 0.2f;
     private float _lifespan = 5f;
 
     #region Speed
@@ -18,6 +15,9 @@ public class MissileModel : GameObjectModel
 
     private Vector2 _velocity;
     public Vector2 Velocity => _velocity;
+
+    public readonly float ArrivalTreshold = 100f;
+    public readonly float PredictedTime = 0.2f;
     #endregion
 
     #region Rotation
@@ -38,7 +38,7 @@ public class MissileModel : GameObjectModel
     public ITarget Target => _target;
 
     private GameObjectType _source;
-    public GameObjectType Source => GameObjectType.Player;
+    public GameObjectType Source => _source;
     #endregion
 
     public MissileModel(Vector2 position) : base(MissleTexture, position)
@@ -78,6 +78,11 @@ public class MissileModel : GameObjectModel
     public void SetTarget(ITarget target)
     {
         _target = target;
+    }
+
+    public void SetSource(GameObjectType source)
+    {
+        _source = source;
     }
 }
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using AceOfAces.Core;
+using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
 namespace AceOfAces.Models;
@@ -17,10 +18,11 @@ public class MissileListModel
         _cooldowns = cooldowns;
     }
 
-    public void CreatMissile(Vector2 position, ITarget target)
+    public void CreatMissile(Vector2 position, ITarget target, GameObjectType source)
     {
         var missile = new MissileModel(position);
         missile.SetTarget(target);
+        missile.SetSource(source);
         missile.Destroyed += OnMissileDestroyed;
 
         AddMissle(missile);

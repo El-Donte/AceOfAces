@@ -1,23 +1,22 @@
-﻿using AceOfAces.Core;
+﻿using AceOfAces.Controllers;
+using AceOfAces.Core;
 using AceOfAces.Models;
-using System.Collections.Generic;
 using System;
-
-namespace AceOfAces.Controllers;
+using System.Collections.Generic;
 
 public class CollisionController : IController
 {
-    private readonly List<GameObjectModel> _allObjects = new List<GameObjectModel>();
+    private const float COLLISION_COOLDOWN = 0.7f;
     private readonly Grid _grid;
-
-    private const float COLLISION_COOLDOWN = 1f;
-    private readonly Dictionary<GameObjectModel, float> _collisionCooldowns = new Dictionary<GameObjectModel, float>();
 
     private readonly PlayerModel _player;
     private readonly List<EnemyModel> _enemies;
     private readonly MissileListModel _missileList;
 
-    public CollisionController(Grid grid, PlayerModel player,MissileListModel missiles, List<EnemyModel> enemies)
+    private readonly Dictionary<GameObjectModel, float> _collisionCooldowns = new Dictionary<GameObjectModel, float>();
+    private readonly HashSet<GameObjectModel> _activeObjects = new HashSet<GameObjectModel>();
+    
+    public CollisionController(Grid grid, PlayerModel player, MissileListModel missiles, List<EnemyModel> enemies)
     {
         _grid = grid;
         _player = player;
@@ -27,10 +26,25 @@ public class CollisionController : IController
 
     public void Update(float deltaTime)
     {
-        UpdateAllObjects();
+        UpdateActiveObjects();
         _grid.UpdateGridPosition(_player.Position);
 
-        foreach (var obj in _allObjects)
+        RegisterObjectsInGrid(deltaTime);
+
+        CheckCollisions();
+    }
+
+    private void UpdateActiveObjects()
+    {
+        _activeObjects.Clear();
+        _activeObjects.Add(_player);
+        _activeObjects.UnionWith(_missileList.Missiles);
+        _activeObjects.UnionWith(_enemies);
+    }
+
+    private void RegisterObjectsInGrid(float deltaTime)
+    {
+        foreach (var obj in _activeObjects)
         {
             UpdateCooldowns(deltaTime);
             if (!obj.IsDestroyed)
@@ -38,69 +52,55 @@ public class CollisionController : IController
                 _grid.AddObject(obj);
             }
         }
-
-        CheckAllCollisions();
     }
 
-
-    private void UpdateAllObjects()
+    private void CheckCollisions()
     {
-        if (_allObjects != null)
-        {
-            _allObjects.Clear();
-        }
-        _allObjects.Add(_player);
-        _allObjects.AddRange(_missileList.Missiles);
-        _allObjects.AddRange(_enemies);
-    }
 
-    private void CheckAllCollisions()
-    {
-        for (int i = 0; i < _allObjects.Count; i++)
+        foreach (var objA in _activeObjects)
         {
-            var objA = _allObjects[i];
             if (objA.IsDestroyed) continue;
 
             var nearbyObjects = _grid.GetNearbyObjects(objA.Position);
 
             foreach (var objB in nearbyObjects)
             {
-                if (objB.IsDestroyed || objA == objB) continue;
+                if (CanSkipCollisionCheck(objA, objB))
+                {
+                    continue;
+                }
 
-                if (CanCollide(objA, objB) &&
-                    objA.Collider.Bounds.Intersects(objB.Collider.Bounds))
+                if (objA.Collider.Bounds.Intersects(objB.Collider.Bounds))
                 {
                     HandleCollision(objA, objB);
-                    StartCooldown(objA);
-                    StartCooldown(objB);
+                    StartCooldown(objA, objB);
                 }
+                
             }
         }
     }
 
-    private bool CanCollide(GameObjectModel a, GameObjectModel b)
+    private bool CanSkipCollisionCheck(GameObjectModel objA, GameObjectModel objB)
     {
-        return CanCollideWith(a) && CanCollideWith(b);
+        return objB.IsDestroyed ||
+               objA == objB ||
+               !(!IsOnCooldown(objA) && !IsOnCooldown(objB));
     }
 
-    private bool CanCollideWith(GameObjectModel other)
+    private bool IsOnCooldown(GameObjectModel obj)
     {
-        if (_collisionCooldowns.TryGetValue(other, out var cooldown))
-        {
-            return cooldown <= 0;
-        }
-        return true;
+        return _collisionCooldowns.TryGetValue(obj, out var cooldown) && cooldown > 0;
     }
 
-    private void StartCooldown(GameObjectModel other)
+    private void StartCooldown(GameObjectModel a, GameObjectModel b)
     {
-        _collisionCooldowns[other] = COLLISION_COOLDOWN;
+        _collisionCooldowns[a] = COLLISION_COOLDOWN;
+        _collisionCooldowns[b] = COLLISION_COOLDOWN;
     }
 
     private void UpdateCooldowns(float deltaTime)
     {
-        var keys = new List<GameObjectModel>(_collisionCooldowns.Keys);
-        foreach (var key in keys)
+        foreach (var key in _collisionCooldowns.Keys)
         {
             _collisionCooldowns[key] -= deltaTime;
             if (_collisionCooldowns[key] <= 0)
@@ -112,65 +112,57 @@ public class CollisionController : IController
 
     private void HandleCollision(GameObjectModel a, GameObjectModel b)
     {
-        if (a is MissileModel missile)
-        {
-            HandleMissileCollision(missile, b);
-        }
-        else if (b is MissileModel missileB)
-        {
-            HandleMissileCollision(missileB, a);
-        }
+        TryHandleCollision<MissileModel>(a, b, HandleMissileCollision);
+        TryHandleCollision<PlayerModel>(a, b, HandlePlayerCollision);
+    }
 
-        if (a is PlayerModel player)
+    private void TryHandleCollision<T>(GameObjectModel a, GameObjectModel b, Action<T, GameObjectModel> handler)
+        where T : GameObjectModel
+    {
+        if (a is T typedA)
         {
-            HandlePlayerCollision(player, b);
-            return;
+            handler(typedA, b);
         }
-        else if (b is PlayerModel playerB)
-        {
-            HandlePlayerCollision(playerB, a);
-            return;
-        }   
     }
 
     private void HandlePlayerCollision(PlayerModel player, GameObjectModel other)
     {
-        switch (other.Collider.ObjectType)
+        switch (other)
         {
-            case GameObjectType.Enemy:
+            case EnemyModel enemy:
                 player.TakeDamage(10);
                 Console.WriteLine(player.Health);
+                //enemy.Dispose();
                 break;
-            case GameObjectType.Missile when other is MissileModel missile && missile.Source == GameObjectType.Enemy:
-                player.TakeDamage(20);
-                Console.WriteLine(player.Health);
-                other.Dispose();
+
+            case MissileModel missile:
+                HandleMissileCollision(missile, player);
                 break;
         }
     }
 
     private void HandleMissileCollision(MissileModel missile, GameObjectModel other)
     {
-        if (other is MissileModel)
-            return;
-
-        bool isFriendlyFire = (missile.Source == GameObjectType.Player && other is PlayerModel) ||
-                             (missile.Source == GameObjectType.Enemy && other is EnemyModel);
-
-        if (isFriendlyFire)
+        if (other is MissileModel || IsFriendlyFire(missile, other))
             return;
 
         switch (other)
         {
-            case EnemyModel enemy when missile.Source == GameObjectType.Player:
+            case EnemyModel enemy:
                 enemy.TakeDamage(missile.Damage);
                 missile.Dispose();
                 break;
 
-            case PlayerModel player when missile.Source == GameObjectType.Enemy:
+            case PlayerModel player:
                 player.TakeDamage(missile.Damage);
                 missile.Dispose();
                 break;
         }
+    }
+
+    private bool IsFriendlyFire(MissileModel missile, GameObjectModel other)
+    {
+        return (missile.Source == GameObjectType.Player && other is PlayerModel) ||
+               (missile.Source == GameObjectType.Enemy && other is EnemyModel);
     }
 }

@@ -36,6 +36,5 @@ public static class InputManager
 
     public static bool IsKeyDown(Keys key) => _currentState.IsKeyDown(key);
     public static bool IsKeyPressed(Keys key) => _currentState.IsKeyDown(key) && !_previousState.IsKeyDown(key);
-    private static bool IsKeyReleased(Keys key) => !_currentState.IsKeyDown(key) && _previousState.IsKeyDown(key);
 }
 

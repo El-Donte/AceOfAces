@@ -22,9 +22,9 @@ public class EnemyModel : GameObjectModel, ITarget
 
     private int _health = 100;
 
-    public EnemyModel(Texture2D texture, Vector2 position) : base(texture, position)
+    public EnemyModel(Texture2D texture, Vector2 position) : base(texture,position)
     {
-        _collider = new CollisionModel(GetBounds(),GameObjectType.Enemy);
+        _collider = new ColliderModel(GetBounds(),GameObjectType.Enemy);
     }
 
     public void TakeDamage(int damage)

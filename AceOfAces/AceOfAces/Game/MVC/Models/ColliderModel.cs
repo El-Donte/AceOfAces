@@ -3,12 +3,12 @@ using Microsoft.Xna.Framework;
 
 namespace AceOfAces.Models;
 
-public class CollisionModel
+public class ColliderModel
 {
     public Rectangle Bounds { get; private set; }
     public GameObjectType ObjectType { get; private set; }
 
-    public CollisionModel(Rectangle bounds, GameObjectType type)
+    public ColliderModel(Rectangle bounds, GameObjectType type)
     {
         Bounds = bounds;
         ObjectType = type;

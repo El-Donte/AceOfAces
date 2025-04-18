@@ -18,7 +18,7 @@ public class MissileListModel
         _cooldowns = cooldowns;
     }
 
-    public void CreatMissile(Vector2 position, ITarget target, GameObjectType source)
+    public void CreateMissile(Vector2 position, ITarget target, GameObjectType source)
     {
         var missile = new MissileModel(position);
         missile.SetTarget(target);
@@ -32,7 +32,7 @@ public class MissileListModel
     {
         foreach (var cooldown in _cooldowns)
         {
-            if (cooldown.Available)
+            if (cooldown.AvailableToFire)
             {
                 cooldown.StartCooldown();
                 _missiles.Add(missile);

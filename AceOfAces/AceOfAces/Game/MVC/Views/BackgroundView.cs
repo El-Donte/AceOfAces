@@ -7,13 +7,14 @@ namespace AceOfAces.Views;
 
 public class BackgroundView : IView
 {
-    private readonly List<BackgroundModel> _models = new List<BackgroundModel>();
+    private readonly List<BackgroundModel> _models;
     private readonly PlayerModel _playerModel;
+
     public SpriteBatch SpriteBatch { get; set; }
 
     public BackgroundView(List<BackgroundModel> models, PlayerModel playerModel)
     {
-        _models.AddRange(models);
+        _models = models;
         _playerModel = playerModel;
     }
 

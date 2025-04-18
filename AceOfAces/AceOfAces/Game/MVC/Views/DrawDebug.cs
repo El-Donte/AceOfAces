@@ -17,7 +17,7 @@ public static class DebugDraw
 
     public static void DrawGrid(SpriteBatch spriteBatch, Grid grid)
     {
-        Vector2 gridCenter = grid.GridWorldPosition;
+        //Vector2 gridCenter = grid.GridWorldPosition;
         Vector2 startPos = grid.GridWorldPosition;
 
         for (int x = 0; x <= grid.Width; x++)

@@ -32,18 +32,21 @@ public class PlayerModel : GameObjectModel, ITarget
     public Vector2 Velocity => _velocity;
 
     private readonly float _minSpeed = 60f;
-    private readonly float _maxSpeed = 500f;
-    private readonly float _acceleration = 400f;
-    private readonly float _decceleration = 100f;
-
     public float MinSpeed => _minSpeed;
+
+    private readonly float _maxSpeed = 500f;
     public float MaxSpeed => _maxSpeed;
-    public float Decceleration => _decceleration;
+
+    private readonly float _acceleration = 400f;
     public float Acceleration => _acceleration;
+
+    private readonly float _decceleration = 100f;
+    public float Decceleration => _decceleration;
     #endregion
 
     #region Invulnerability
     private float _invulnerabilityTimer;
+
     public float InvulnerabilityTimer
     {
         get => _invulnerabilityTimer;
@@ -52,6 +55,7 @@ public class PlayerModel : GameObjectModel, ITarget
             _invulnerabilityTimer = value;
         }
     }
+
     public bool IsInvulnerable => _invulnerabilityTimer > 0; // Находится ли игрок в состоянии неуязвимости
     #endregion
 
@@ -59,6 +63,8 @@ public class PlayerModel : GameObjectModel, ITarget
     public event Action<float> OnBlinkPhaseChanged;
 
     private float _blinkPhase = 0f;
+    private int _firedMissileCount;
+
     public float BlinkPhase
     {
         get => _blinkPhase;
@@ -70,15 +76,38 @@ public class PlayerModel : GameObjectModel, ITarget
     }
     #endregion
 
+    #region Missile
+    private readonly Vector2 PointLocalOffset = new Vector2(30, 0);
+
+    public int MaxMissileCount => 2;
+
+    public Vector2 MissileJointPosition => GetMissilePosition();
+
+    public int FiredMissileCount
+    {
+        get => _firedMissileCount;
+        set
+        {
+            if(_firedMissileCount == MaxMissileCount)
+            {
+                _firedMissileCount = 0;
+            }
+            _firedMissileCount = value;
+        }
+    }
+    #endregion
+
+    public event Action<Vector2> PositionChangedEvent;
+
     public PlayerModel(Texture2D texture, Vector2 position) : base(texture, position)
     {
-        _collider = new CollisionModel(GetBounds(),GameObjectType.Player);
+        _collider = new ColliderModel(GetBounds(),GameObjectType.Player);
     }
     public void SetPosition(Vector2 position)
     {
         _position += position;
-        Console.WriteLine(_position);
         _collider.UpdateBounds(GetBounds());
+        PositionChangedEvent?.Invoke(_position);
     }
 
     public void SetRoration(float rotation)
@@ -96,16 +125,6 @@ public class PlayerModel : GameObjectModel, ITarget
         _velocity = velocity;
     }
 
-    public Vector2 GetMissilePosition()
-    {
-        Vector2 PointLocalOffset = new Vector2(30, 0);
-        Vector2 rotatedOffset = new Vector2(
-            PointLocalOffset.X * (float)Math.Cos(Rotation) - PointLocalOffset.Y * (float)Math.Sin(Rotation),
-            PointLocalOffset.X * (float)Math.Sin(Rotation) + PointLocalOffset.Y * (float)Math.Cos(Rotation)
-        );
-        return rotatedOffset;
-    }
-
     public void TakeDamage(int damage)
     {
         if (IsInvulnerable)
@@ -118,6 +137,17 @@ public class PlayerModel : GameObjectModel, ITarget
         _invulnerabilityTimer = 1.5f;
 
         OnDamaged?.Invoke(IsInvulnerable);
+    }
+
+    private Vector2 GetMissilePosition()
+    {
+        Vector2 rotatedOffset = new Vector2(
+            PointLocalOffset.X * (float)Math.Cos(Rotation) - PointLocalOffset.Y * (float)Math.Sin(Rotation),
+            PointLocalOffset.X * (float)Math.Sin(Rotation) + PointLocalOffset.Y * (float)Math.Cos(Rotation)
+        );
+
+        var offset = FiredMissileCount % 2 == 0 ? -rotatedOffset : rotatedOffset;
+        return offset;
     }
 }
 

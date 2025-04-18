@@ -7,6 +7,7 @@ namespace AceOfAces.Models;
 public class MissileModel : GameObjectModel
 {
     public static Texture2D MissleTexture { get; set; }
+
     private float _lifespan = 5f;
 
     #region Speed
@@ -43,7 +44,7 @@ public class MissileModel : GameObjectModel
 
     public MissileModel(Vector2 position) : base(MissleTexture, position)
     {
-        _collider = new CollisionModel(GetBounds(), GameObjectType.Missile);
+        _collider = new ColliderModel(GetBounds(), GameObjectType.Missile);
     }
 
     public void SetPosition(Vector2 position)

@@ -10,16 +10,16 @@ public class PlayerController : IController
 {
     private readonly MissileListModel _missiles;
     private readonly PlayerModel _model;
+
     private Vector2 _inputDirection;
     private EnemyModel _enemy;
-
-    int missilecount = 0;
 
     public PlayerController(PlayerModel playerModel,MissileListModel missileList, EnemyModel enemyModel)
     {
         _model = playerModel;
         _missiles = missileList;
         _enemy = enemyModel;
+
         _model.Destroyed += OnPlayerDestroyed;
         _model.OnDamaged += StartBlinkingEffect;
     }
@@ -81,23 +81,10 @@ public class PlayerController : IController
 
     private void Fire()
     {
-        
-        if (InputManager.IsKeyPressed(Keys.Space))
+        if (InputManager.IsKeyPressed(Keys.Space) && (_missiles.Cooldowns[0].AvailableToFire || _missiles.Cooldowns[1].AvailableToFire))
         {
-            if(missilecount % 2 == 0)
-            {
-                _missiles.CreatMissile(_model.Position - _model.GetMissilePosition(), _enemy, Core.GameObjectType.Player);
-                missilecount++;
-            }
-            else {
-                _missiles.CreatMissile(_model.Position + _model.GetMissilePosition(), _enemy, Core.GameObjectType.Player);
-                missilecount++;
-            }
-
-            if(missilecount == 2)
-            {
-                missilecount = 0;
-            }
+            _missiles.CreateMissile(_model.Position + _model.MissileJointPosition, _enemy, Core.GameObjectType.Player);
+            _model.FiredMissileCount++;
         }
     }
 

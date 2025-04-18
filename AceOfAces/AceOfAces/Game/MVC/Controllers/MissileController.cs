@@ -66,13 +66,13 @@ public class MissileController : IController
     {
         foreach (var cooldown in _missilesList.Cooldowns)
         {
-            if (cooldown.Available) continue;
+            if (cooldown.AvailableToFire) continue;
 
             cooldown.Timer -= deltaTime;
 
             if (cooldown.Timer <= 0)
             {
-                cooldown.Available = true;
+                cooldown.AvailableToFire = true;
             }
         }
     }

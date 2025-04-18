@@ -7,14 +7,14 @@ namespace AceOfAces.Views
 {
     public class CooldownBarView : IView
     {
+        private readonly MissileCooldownModel _model;
         private readonly Texture2D _texture;
+        private readonly Vector2 _screenMargin;
         private readonly int _width;
         private readonly int _height;
-        private readonly MissileCooldownModel _model;
-        private readonly Vector2 _screenMargin;
 
         public SpriteBatch SpriteBatch { get; set; }
-        public Camera2d Camera { get; set; }
+        public Camera Camera { get; set; }
         public GraphicsDevice GraphicsDevice { get; set; }
 
         public CooldownBarView(MissileCooldownModel model,Texture2D texture,Vector2 screenMargin)

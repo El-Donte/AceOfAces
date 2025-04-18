@@ -60,9 +60,10 @@ public class Grid
     public List<GameObjectModel> GetNearbyObjects(Vector2 objectPosition)
     {
         var result = new List<GameObjectModel>();
-        int radius = Math.Max(_width, _height);
-        int centerX = _width / 2;
-        int centerY = _height / 2;
+        
+        int centerX = _width / 2 + 1;
+        int centerY = _height / 2 + 1;
+        int radius = Math.Max(centerX, centerY);
 
         for (int x = centerX - radius; x <= centerX + radius; x++)
         {

@@ -12,8 +12,8 @@ public abstract class GameObjectModel : IDisposable
     #endregion
 
     #region Collisions
-    protected CollisionModel _collider;
-    public CollisionModel Collider => _collider;
+    protected ColliderModel _collider;
+    public ColliderModel Collider => _collider;
     #endregion
 
     #region Destroyed

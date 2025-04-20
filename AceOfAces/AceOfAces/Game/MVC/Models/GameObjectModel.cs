@@ -56,7 +56,8 @@ public abstract class GameObjectModel : IDisposable
             (int)_position.X - _texture.Width / 4,
             (int)_position.Y - _texture.Height / 4,
             _texture.Width / 2,
-            _texture.Height / 2);
+            _texture.Height / 2
+        );
     }
 }
 

@@ -1,62 +1,89 @@
 ﻿using AceOfAces.Core;
+using AceOfAces.Managers;
+using AceOfAces.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 
 namespace AceOfAces.Views;
 
-public static class DebugDraw
+public class DebugDraw : IView
 {
-    private static Texture2D _pixelTexture;
-    private static Color _gridColor = Color.Violet;
+    private readonly Texture2D _pixelTexture;
 
-    public static void Initialize(GraphicsDevice graphicsDevice)
+    private readonly Grid _grid;
+    private readonly List<ColliderModel> _colliders;
+    private readonly MissileListModel _missileList;
+
+    public SpriteBatch SpriteBatch { get; set; }
+
+    public DebugDraw(Texture2D pixelTexture, Grid grid, List<ColliderModel> colliders, MissileListModel missileList)
     {
-        _pixelTexture = new Texture2D(graphicsDevice, 1, 1);
-        _pixelTexture.SetData(new[] { Color.White });
+        _pixelTexture = pixelTexture;
+        _grid = grid;
+        _colliders = colliders;
+        _missileList = missileList;
     }
 
-    public static void DrawGrid(SpriteBatch spriteBatch, Grid grid)
+    public void Draw()
     {
-        //Vector2 gridCenter = grid.GridWorldPosition;
-        Vector2 startPos = grid.GridWorldPosition;
+        if (GameManager.IsDebugMode == false) return;
 
-        for (int x = 0; x <= grid.Width; x++)
+        DrawGrid();
+
+        foreach (var collider in _colliders)
         {
-            Vector2 linePos = startPos + new Vector2(x * grid.CellSize, 0);
-            spriteBatch.Draw(
+            DrawRectangle(collider.Bounds, Color.Red);
+        }
+
+        foreach (var missile in _missileList.Missiles)
+        {
+            DrawRectangle(missile.Collider.Bounds, Color.Blue);
+        }
+    }
+
+
+    private void DrawGrid()
+    {
+        Vector2 startPos = _grid.GridWorldPosition;
+
+        for (int x = 0; x <= _grid.Width; x++)
+        {
+            Vector2 linePos = startPos + new Vector2(x * _grid.CellSize, 0);
+            SpriteBatch.Draw(
                 _pixelTexture,
                 new Rectangle(
                     (int)linePos.X,
                     (int)linePos.Y,
                     1,
-                    grid.Height * grid.CellSize
+                    _grid.Height * _grid.CellSize
                 ),
-                _gridColor
+                Color.DarkViolet
             );
         }
 
-        for (int y = 0; y <= grid.Height; y++)
+        for (int y = 0; y <= _grid.Height; y++)
         {
-            Vector2 linePos = startPos + new Vector2(0, y * grid.CellSize);
-            spriteBatch.Draw(
+            Vector2 linePos = startPos + new Vector2(0, y * _grid.CellSize);
+            SpriteBatch.Draw(
                 _pixelTexture,
                 new Rectangle(
                     (int)linePos.X,
                     (int)linePos.Y,
-                        grid.Width * grid.CellSize,
+                        _grid.Width * _grid.CellSize,
                     1
                 ),
-                _gridColor
+               Color.DarkViolet
             );
         }
     }
 
-    public static void DrawRectangle(SpriteBatch spriteBatch, Rectangle rect, Color color, int lineWidth = 1)
+    private void DrawRectangle(Rectangle rect, Color color, int lineWidth = 1)
     {
-        spriteBatch.Draw(_pixelTexture, new Rectangle(rect.X, rect.Y, rect.Width, lineWidth), color);
-        spriteBatch.Draw(_pixelTexture, new Rectangle(rect.X, rect.Y + rect.Height - lineWidth, rect.Width, lineWidth), color);
-        spriteBatch.Draw(_pixelTexture, new Rectangle(rect.X, rect.Y, lineWidth, rect.Height), color);
-        spriteBatch.Draw(_pixelTexture, new Rectangle(rect.X + rect.Width - lineWidth, rect.Y, lineWidth, rect.Height), color);
+        SpriteBatch.Draw(_pixelTexture, new Rectangle(rect.X, rect.Y, rect.Width, lineWidth), color);
+        SpriteBatch.Draw(_pixelTexture, new Rectangle(rect.X, rect.Y + rect.Height - lineWidth, rect.Width, lineWidth), color);
+        SpriteBatch.Draw(_pixelTexture, new Rectangle(rect.X, rect.Y, lineWidth, rect.Height), color);
+        SpriteBatch.Draw(_pixelTexture, new Rectangle(rect.X + rect.Width - lineWidth, rect.Y, lineWidth, rect.Height), color);
     }
 }
 

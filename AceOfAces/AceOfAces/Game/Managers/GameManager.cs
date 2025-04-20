@@ -19,11 +19,7 @@ public class GameManager
     private readonly Camera camera;
     private readonly Grid _grid;
 
-    private readonly List<ColliderModel> _colliders = new List<ColliderModel>();
-    private PlayerModel _playerModel;
-    private MissileListModel missles;
-
-    public static bool isDebug;
+    public static bool IsDebugMode = false;
 
     public GameManager(GraphicsDeviceManager graphics, ContentManager contentManager)
     {
@@ -32,13 +28,13 @@ public class GameManager
         _grid = new Grid(64, graphics);
         camera = new Camera(graphics.GraphicsDevice.Viewport);
 
-        DebugDraw.Initialize(graphics.GraphicsDevice);
+        var pixelTexture = new Texture2D(graphics.GraphicsDevice, 1, 1);
+        pixelTexture.SetData(new[] { Color.White });
 
         #region Models
-        _playerModel = new PlayerModel(contentManager.Load<Texture2D>("jets/jet"), 
-            new(graphics.GraphicsDevice.Viewport.Width / 2, graphics.GraphicsDevice.Viewport.Height / 2));
-
-        _playerModel.PositionChangedEvent += camera.SetPosition;
+        var startPos = new Vector2(graphics.GraphicsDevice.Viewport.Width / 2, graphics.GraphicsDevice.Viewport.Height / 2);
+        var playerModel = new PlayerModel(contentManager.Load<Texture2D>("jets/jet"), startPos);
+        playerModel.PositionChangedEvent += camera.SetPosition;
 
         var enemyModel = new EnemyModel(contentManager.Load<Texture2D>("jets/jet"), Vector2.Zero);
 
@@ -48,35 +44,35 @@ public class GameManager
             new BackgroundModel(contentManager.Load<Texture2D>("Clouds/Clouds3"), 1.1f, 1.4f, graphics.GraphicsDevice.Viewport)
         };
 
-        MissileModel.MissleTexture = contentManager.Load<Texture2D>("missile");
-
         var missileCooldownTexture = contentManager.Load<Texture2D>("missileCooldown");
-        //var font = _contentManager.Load<SpriteFont>("Fonts/font");
+        var missileTexture = contentManager.Load<Texture2D>("missile");
 
         var cooldowns = new List<MissileCooldownModel>();
         for (int i = 0; i < 2; i++)
         {
             cooldowns.Add(new MissileCooldownModel(3f));
         }
+        var missles = new MissileListModel(cooldowns);
 
-        missles = new MissileListModel(cooldowns);
-
-        _colliders.Add(_playerModel.Collider);
-        _colliders.Add(enemyModel.Collider);
+        var colliders = new List<ColliderModel>();
+        colliders.Add(playerModel.Collider);
+        colliders.Add(enemyModel.Collider);
         #endregion
 
         #region Controllers
-        _controllers.Add(new PlayerController(_playerModel, missles, enemyModel));
-        _controllers.Add(new BackGroundController(layers, _playerModel));
+        _controllers.Add(new PlayerController(playerModel, missles, enemyModel));
         _controllers.Add(new MissileController(missles));
-        _controllers.Add(new CollisionController(_grid, _playerModel, missles, new List<EnemyModel>() { enemyModel }));
+        _controllers.Add(new CollisionController(_grid, playerModel, missles, new List<EnemyModel>() { enemyModel }));
+        _controllers.Add(new BackGroundController(layers, playerModel));
         #endregion
 
         #region Views
-        _views.Add(new BackgroundView(layers,_playerModel) { SpriteBatch = _spriteBatch });
+        MissileModel.SetTerxture(missileTexture);
+        _views.Add(new BackgroundView(layers, playerModel) { SpriteBatch = _spriteBatch });
+        _views.Add(new PlayerView(playerModel, missileTexture, cooldowns) {SpriteBatch = _spriteBatch});
         _views.Add(new EnemyView(enemyModel) { SpriteBatch = _spriteBatch });
-        _views.Add(new PlayerView(_playerModel, MissileModel.MissleTexture, cooldowns) {SpriteBatch = _spriteBatch});
         _views.Add(new MissilesView(missles) { SpriteBatch = _spriteBatch });
+        _views.Add(new DebugDraw(pixelTexture, _grid, colliders, missles) { SpriteBatch = _spriteBatch });
  
         for (int i = 0; i < missles.Cooldowns.Count; i++)
         {
@@ -109,23 +105,7 @@ public class GameManager
             view.Draw();
         }
 
-        if (isDebug)
-        {
-            foreach (var collider in _colliders)
-            {
-                DebugDraw.DrawRectangle(_spriteBatch, collider.Bounds, Color.Red);
-            }
-
-            for (int i = 0; i < missles.Missiles.Count; i++)
-            {
-                DebugDraw.DrawRectangle(_spriteBatch, missles.Missiles[i].Collider.Bounds, Color.Blue);
-            }
-
-            DebugDraw.DrawGrid(_spriteBatch, _grid);
-        }
-
         _spriteBatch.End();
     }
-
 }
 

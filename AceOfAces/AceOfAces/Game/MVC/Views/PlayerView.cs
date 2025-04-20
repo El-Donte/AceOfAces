@@ -56,7 +56,8 @@ public class PlayerView : IView
             _missileOrigin,
             1f,
             SpriteEffects.None,
-            0f);
+            0f
+        );
     }
 
     private void DrawPlayer(Color color)

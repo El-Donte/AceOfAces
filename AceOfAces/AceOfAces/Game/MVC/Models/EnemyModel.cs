@@ -14,7 +14,7 @@ public class EnemyModel : GameObjectModel, ITarget
     protected float _rotation;
     public float Rotation => _rotation; // Угол поворота
 
-    public event Action<float> RotationChanged;
+    //public event Action<float> RotationChanged;
     #endregion
 
     private Vector2 _velocity;

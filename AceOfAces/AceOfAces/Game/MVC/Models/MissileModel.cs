@@ -6,7 +6,7 @@ namespace AceOfAces.Models;
 
 public class MissileModel : GameObjectModel
 {
-    public static Texture2D MissleTexture { get; set; }
+    private static Texture2D missileTexture;
 
     private float _lifespan = 5f;
 
@@ -42,10 +42,12 @@ public class MissileModel : GameObjectModel
     public GameObjectType Source => _source;
     #endregion
 
-    public MissileModel(Vector2 position) : base(MissleTexture, position)
+    public MissileModel(Vector2 position) : base(missileTexture, position)
     {
         _collider = new ColliderModel(GetBounds(), GameObjectType.Missile);
     }
+
+    public static void SetTerxture(Texture2D texture) => missileTexture = texture;
 
     public void SetPosition(Vector2 position)
     {

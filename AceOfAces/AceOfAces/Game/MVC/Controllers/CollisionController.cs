@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 public class CollisionController : IController
 {
-    private const float COLLISION_COOLDOWN = 0.7f;
+    private readonly float collisionCooldownTime = 0.7f;
     private readonly Grid _grid;
 
     private readonly PlayerModel _player;
@@ -94,8 +94,8 @@ public class CollisionController : IController
 
     private void StartCooldown(GameObjectModel a, GameObjectModel b)
     {
-        _collisionCooldowns[a] = COLLISION_COOLDOWN;
-        _collisionCooldowns[b] = COLLISION_COOLDOWN;
+        _collisionCooldowns[a] = collisionCooldownTime;
+        _collisionCooldowns[b] = collisionCooldownTime;
     }
 
     private void UpdateCooldowns(float deltaTime)
@@ -150,6 +150,7 @@ public class CollisionController : IController
         {
             case EnemyModel enemy:
                 enemy.TakeDamage(missile.Damage);
+                Console.WriteLine("fwfw");
                 missile.Dispose();
                 break;
 

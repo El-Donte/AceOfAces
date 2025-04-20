@@ -21,7 +21,7 @@ public class PlayerModel : GameObjectModel, ITarget
     protected float _rotation;
     public float Rotation => _rotation; // Угол поворота
 
-    public event Action<float> RotationChanged;
+    //public event Action<float> RotationChanged;
     #endregion
 
     #region Speed
@@ -77,11 +77,11 @@ public class PlayerModel : GameObjectModel, ITarget
     #endregion
 
     #region Missile
-    private readonly Vector2 PointLocalOffset = new Vector2(30, 0);
+    private readonly Vector2 PointLocalOffset = new(30, 0);
 
     public int MaxMissileCount => 2;
 
-    public Vector2 MissileJointPosition => GetMissilePosition();
+    public Vector2 MissileJointPosition => GetMissileJointPosition();
 
     public int FiredMissileCount
     {
@@ -139,9 +139,9 @@ public class PlayerModel : GameObjectModel, ITarget
         OnDamaged?.Invoke(IsInvulnerable);
     }
 
-    private Vector2 GetMissilePosition()
+    private Vector2 GetMissileJointPosition()
     {
-        Vector2 rotatedOffset = new Vector2(
+        Vector2 rotatedOffset = new(
             PointLocalOffset.X * (float)Math.Cos(Rotation) - PointLocalOffset.Y * (float)Math.Sin(Rotation),
             PointLocalOffset.X * (float)Math.Sin(Rotation) + PointLocalOffset.Y * (float)Math.Cos(Rotation)
         );

@@ -25,7 +25,7 @@ public static class InputManager
 
         if (IsKeyPressed(Keys.OemComma))
         {
-            GameManager.isDebug = !GameManager.isDebug;
+            GameManager.IsDebugMode = !GameManager.IsDebugMode;
         }
 
         if (_inputDirection != Vector2.Zero)

@@ -22,63 +22,85 @@ public class Grid
     private int _height;
     public int Height => _height;
 
-    public Grid(int cellSize, GraphicsDeviceManager graphics)
+    private Rectangle _gridBounds;
+
+    public Grid(int cellSize, GraphicsDeviceManager graphics )
     {
         _cellSize = cellSize;
         _graphics = graphics;
-    }
 
-    private void UpdateGridWidthHeight()
-    {
-        _width = (int)Math.Ceiling((float)_graphics.GraphicsDevice.Viewport.Width / _cellSize) + 1;
-        _height = (int)Math.Ceiling((float)_graphics.GraphicsDevice.Viewport.Height / _cellSize) + 1;
+        _width = (int)Math.Ceiling((float)_graphics.GraphicsDevice.Viewport.Width / cellSize) + 2;
+        _height =(int)Math.Ceiling((float)_graphics.GraphicsDevice.Viewport.Height / cellSize) + 2;
+
         _cells = new GameObjectModel[_width, _height];
+        _gridBounds = new Rectangle(0, 0, _width * _cellSize, _height * _cellSize);
     }
 
-    public void UpdateGridPosition(Vector2 playerPosition)
+    public void UpdateGridPosition(Vector2 centerPosition)
     {
-        UpdateGridWidthHeight();
         _gridWorldPosition = new Vector2(
-            playerPosition.X - (_width * _cellSize) / 2f,
-            playerPosition.Y - (_height * _cellSize) / 2f
+            centerPosition.X - (_width * _cellSize) / 2,
+            centerPosition.Y - (_height * _cellSize) / 2
         );
+
+        _gridBounds.X = (int)_gridWorldPosition.X;
+        _gridBounds.Y = (int)_gridWorldPosition.Y;
     }
 
     public void AddObject(GameObjectModel obj)
     {
-        Vector2 relativePos = obj.Position - _gridWorldPosition;
+        if (!_gridBounds.Contains(obj.Position))
+        {
+            return;
+        }
 
-        int x = (int)(relativePos.X / _cellSize);
-        int y = (int)(relativePos.Y / _cellSize);
+        Vector2 gridRelativePos = obj.Position - _gridWorldPosition;
+        int x = (int)(gridRelativePos.X / _cellSize);
+        int y = (int)(gridRelativePos.Y / _cellSize);
 
-        if (x >= 0 && x < _width && y >= 0 && y < _height)
+        var isInGrid = x >= 0 && x < _width && y >= 0 && y < _height;
+        if (isInGrid)
         {
             _cells[x, y] = obj;
         }
     }
 
-    public List<GameObjectModel> GetNearbyObjects(Vector2 objectPosition)
+    public List<GameObjectModel> GetNearbyObjects(Vector2 position, int radiusInCells = 2)
     {
         var result = new List<GameObjectModel>();
-        
-        int centerX = _width / 2 + 1;
-        int centerY = _height / 2 + 1;
-        int radius = Math.Max(centerX, centerY);
 
-        for (int x = centerX - radius; x <= centerX + radius; x++)
+        if (!_gridBounds.Contains(position))
         {
-            for (int y = centerY - radius; y <= centerY + radius; y++)
+            return result;
+        }
+
+        var (minX, maxX, minY, maxY) = GetBounds(position, radiusInCells);
+
+        for (int x = minX; x <= maxX; x++)
+        {
+            for (int y = minY; y <= maxY; y++)
             {
-                if (x >= 0 && x < _width && y >= 0 && y < _height)
+                if (_cells[x, y] != null)
                 {
-                    if (_cells[x, y] != null)
-                    {
-                        result.Add(_cells[x, y]);
-                    }
+                    result.Add(_cells[x, y]);
                 }
             }
         }
 
         return result;
+    }
+
+    private (int minX, int maxX, int minY, int maxY) GetBounds(Vector2 position, int radiusInCells = 2)
+    {
+        Vector2 gridRelativePos = position - _gridWorldPosition;
+        int centerX = (int)(gridRelativePos.X / _cellSize);
+        int centerY = (int)(gridRelativePos.Y / _cellSize);
+
+        int minX = Math.Max(centerX - radiusInCells, 0);
+        int maxX = Math.Min(centerX + radiusInCells, _width - 1);
+        int minY = Math.Max(centerY - radiusInCells, 0);
+        int maxY = Math.Min(centerY + radiusInCells, _height - 1);
+
+        return (minX, maxX, minY, maxY);
     }
 }

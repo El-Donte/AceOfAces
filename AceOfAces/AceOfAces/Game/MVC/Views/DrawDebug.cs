@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace AceOfAces.Views;
 
-public class DebugDraw : IView
+public class DebugView : IView
 {
     private readonly Texture2D _pixelTexture;
 
@@ -17,7 +17,7 @@ public class DebugDraw : IView
 
     public SpriteBatch SpriteBatch { get; set; }
 
-    public DebugDraw(Texture2D pixelTexture, Grid grid, List<ColliderModel> colliders, MissileListModel missileList)
+    public DebugView(Texture2D pixelTexture, Grid grid, List<ColliderModel> colliders, MissileListModel missileList)
     {
         _pixelTexture = pixelTexture;
         _grid = grid;

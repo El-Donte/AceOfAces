@@ -69,8 +69,8 @@ public class Grid
     {
         var result = new List<GameObjectModel>();
 
-        if (!_gridBounds.Contains(position))
-        {
+        if (!_gridBounds.Contains(position)) 
+        { 
             return result;
         }
 

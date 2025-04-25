@@ -44,7 +44,7 @@ public class MissileModel : GameObjectModel
 
     public MissileModel(Vector2 position) : base(missileTexture, position)
     {
-        _collider = new ColliderModel(GetBounds(), GameObjectType.Missile);
+        _collider = new ColliderModel(GetBounds());
     }
 
     public static void SetTerxture(Texture2D texture) => missileTexture = texture;

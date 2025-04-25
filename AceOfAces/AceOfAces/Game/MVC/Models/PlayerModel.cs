@@ -8,20 +8,20 @@ namespace AceOfAces.Models;
 public class PlayerModel : GameObjectModel, ITarget
 {
     #region Health
+    public event Action<bool> OnDamagedEvent;
+
     private int _health = 100;
     public int Health => _health; // Здоровье
-
-    public event Action<bool> OnDamaged;
     #endregion
 
     #region Rotation
+    //public event Action<float> RotationChanged;
+
     private readonly float _rotationSpeed = 4f;
     public float RotationSpeed => _rotationSpeed;
 
     protected float _rotation;
     public float Rotation => _rotation; // Угол поворота
-
-    //public event Action<float> RotationChanged;
     #endregion
 
     #region Speed
@@ -60,10 +60,9 @@ public class PlayerModel : GameObjectModel, ITarget
     #endregion
 
     #region Blink
-    public event Action<float> OnBlinkPhaseChanged;
+    public event Action<float> OnBlinkPhaseChangedEvent;
 
     private float _blinkPhase = 0f;
-    private int _firedMissileCount;
 
     public float BlinkPhase
     {
@@ -71,7 +70,7 @@ public class PlayerModel : GameObjectModel, ITarget
         set
         {
             _blinkPhase = value;
-            OnBlinkPhaseChanged?.Invoke(_blinkPhase);
+            OnBlinkPhaseChangedEvent?.Invoke(_blinkPhase);
         }
     }
     #endregion
@@ -83,6 +82,7 @@ public class PlayerModel : GameObjectModel, ITarget
 
     public Vector2 MissileJointPosition => GetMissileJointPosition();
 
+    private int _firedMissileCount;
     public int FiredMissileCount
     {
         get => _firedMissileCount;
@@ -101,8 +101,9 @@ public class PlayerModel : GameObjectModel, ITarget
 
     public PlayerModel(Texture2D texture, Vector2 position) : base(texture, position)
     {
-        _collider = new ColliderModel(GetBounds(),GameObjectType.Player);
+        _collider = new ColliderModel(GetBounds());
     }
+
     public void SetPosition(Vector2 position)
     {
         _position += position;
@@ -117,7 +118,7 @@ public class PlayerModel : GameObjectModel, ITarget
 
     public void SetCurrentSpeed(float speed)
     {
-        _currentSpeed = speed;
+        _currentSpeed = MathHelper.Clamp(speed, _minSpeed, _maxSpeed);
     }
 
     public void SetVelocity(Vector2 velocity)
@@ -136,7 +137,7 @@ public class PlayerModel : GameObjectModel, ITarget
 
         _invulnerabilityTimer = 1.5f;
 
-        OnDamaged?.Invoke(IsInvulnerable);
+        OnDamagedEvent?.Invoke(IsInvulnerable);
     }
 
     private Vector2 GetMissileJointPosition()

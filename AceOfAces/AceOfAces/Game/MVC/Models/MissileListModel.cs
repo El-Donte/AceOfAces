@@ -23,7 +23,7 @@ public class MissileListModel
         var missile = new MissileModel(position);
         missile.SetTarget(target);
         missile.SetSource(source);
-        missile.Destroyed += OnMissileDestroyed;
+        missile.DestroyedEvent += OnMissileDestroyed;
 
         AddMissle(missile);
     }
@@ -43,7 +43,7 @@ public class MissileListModel
 
     private void OnMissileDestroyed(GameObjectModel missile)
     {
-        missile.Destroyed -= OnMissileDestroyed;
+        missile.DestroyedEvent -= OnMissileDestroyed;
         _missiles.Remove((MissileModel)missile);
     }
 }

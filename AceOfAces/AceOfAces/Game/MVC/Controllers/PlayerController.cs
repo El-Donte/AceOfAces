@@ -20,8 +20,8 @@ public class PlayerController : IController
         _missiles = missileList;
         _enemy = enemyModel;
 
-        _model.Destroyed += OnPlayerDestroyed;
-        _model.OnDamaged += StartBlinkingEffect;
+        _model.DestroyedEvent += OnPlayerDestroyed;
+        _model.OnDamagedEvent += StartBlinkingEffect;
     }
 
     public void Update(float deltaTime)
@@ -35,41 +35,23 @@ public class PlayerController : IController
 
     private void UpdateMovement(float deltaTime)
     {
-        var rotation = _inputDirection.X * _model.RotationSpeed * deltaTime;
-        _model.SetRoration(rotation);
+        _model.SetRoration(_inputDirection.X * _model.RotationSpeed * deltaTime);
+
+        bool isAccelerating = _inputDirection.Y > 0;
+        UpdateSpeed(isAccelerating ? 1 : 2, !isAccelerating, deltaTime);
 
         Vector2 direction = new Vector2((float)Math.Sin(_model.Rotation), -(float)Math.Cos(_model.Rotation));
+        _model.SetVelocity((_inputDirection.Y + 2) * direction * _model.CurrentSpeed);
 
-        if (_inputDirection.Y > 0)
-        {
-            UpdateSpeed(1, false, deltaTime);
-        }
-        else
-        {
-            var keyKoeff = _inputDirection.Y < 0 ? 2 : 1;
-            UpdateSpeed(keyKoeff, true, deltaTime);
-        }
-
-        var velocity = (_inputDirection.Y + 2) * direction * _model.CurrentSpeed;
-        _model.SetVelocity(velocity);
-
-        var position = _model.Velocity * deltaTime;
-        _model.SetPosition(position);
+        _model.SetPosition(_model.Velocity * deltaTime);
     }
 
     private void UpdateSpeed(int k, bool isBreaking, float deltaTime)
     {
         var currentSpeed = _model.CurrentSpeed;
-        if (isBreaking)
-        {
-            currentSpeed -= k * _model.Decceleration * deltaTime;
-        }
-        else
-        {
-            currentSpeed += k * _model.Acceleration * deltaTime;
-        }
 
-        currentSpeed = MathHelper.Clamp(currentSpeed, _model.MinSpeed, _model.MaxSpeed);
+        currentSpeed += k * (isBreaking ? -_model.Decceleration : _model.Acceleration) * deltaTime;
+
         _model.SetCurrentSpeed(currentSpeed);
     }
 
@@ -81,7 +63,9 @@ public class PlayerController : IController
 
     private void Fire()
     {
-        if (InputManager.IsKeyPressed(Keys.Space) && (_missiles.Cooldowns[0].AvailableToFire || _missiles.Cooldowns[1].AvailableToFire))
+        if (InputManager.IsKeyPressed(Keys.Space) && 
+            (_missiles.Cooldowns[0].AvailableToFire || 
+             _missiles.Cooldowns[1].AvailableToFire))
         {
             _missiles.CreateMissile(_model.Position + _model.MissileJointPosition, _enemy, Core.GameObjectType.Player);
             _model.FiredMissileCount++;
@@ -116,7 +100,7 @@ public class PlayerController : IController
 
     private void OnPlayerDestroyed(GameObjectModel player)
     {
-        _model.Destroyed -= OnPlayerDestroyed;
+        _model.DestroyedEvent -= OnPlayerDestroyed;
     }
 }
 

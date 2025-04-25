@@ -27,10 +27,10 @@ public class CollisionController : IController
     public void Update(float deltaTime)
     {
         UpdateActiveObjects();
-        _grid.UpdateGridPosition(_player.Position);
 
-        RegisterObjectsInGrid(deltaTime);
+        RegisterObjectsInGrid();
 
+        UpdateCooldowns(deltaTime);
         CheckCollisions();
     }
 
@@ -42,11 +42,10 @@ public class CollisionController : IController
         _activeObjects.UnionWith(_enemies);
     }
 
-    private void RegisterObjectsInGrid(float deltaTime)
+    private void RegisterObjectsInGrid()
     {
         foreach (var obj in _activeObjects)
         {
-            UpdateCooldowns(deltaTime);
             if (!obj.IsDestroyed)
             {
                 _grid.AddObject(obj);
@@ -150,7 +149,6 @@ public class CollisionController : IController
         {
             case EnemyModel enemy:
                 enemy.TakeDamage(missile.Damage);
-                Console.WriteLine("fwfw");
                 missile.Dispose();
                 break;
 

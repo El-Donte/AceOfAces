@@ -19,7 +19,7 @@ public abstract class GameObjectModel : IDisposable
     #region Destroyed
     private bool _isDestroyed;
     public bool IsDestroyed => _isDestroyed;
-    public event Action<GameObjectModel> Destroyed;
+    public event Action<GameObjectModel> DestroyedEvent;
     #endregion
 
     #region Position
@@ -45,9 +45,9 @@ public abstract class GameObjectModel : IDisposable
 
         _isDestroyed = true;
 
-        Destroyed?.Invoke(this);
+        DestroyedEvent?.Invoke(this);
 
-        Destroyed = null;
+        DestroyedEvent = null;
     }
 
     protected Rectangle GetBounds()

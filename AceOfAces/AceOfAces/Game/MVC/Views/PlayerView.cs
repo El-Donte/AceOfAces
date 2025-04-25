@@ -25,7 +25,7 @@ public class PlayerView : IView
         _missileTexture = missileTexture;
         _missileOrigin = new Vector2(_missileTexture.Width / 2, _missileTexture.Height / 2);
 
-        _model.OnBlinkPhaseChanged += SetAlpha;
+        _model.OnBlinkPhaseChangedEvent += SetAlpha;
     }
 
     public void Draw()

@@ -7,6 +7,7 @@ namespace AceOfAces.Core;
 
 public class Grid
 {
+    
     private readonly GraphicsDeviceManager _graphics;
     private GameObjectModel[,] _cells;
 
@@ -23,6 +24,10 @@ public class Grid
     public int Height => _height;
 
     private Rectangle _gridBounds;
+
+    private readonly HashSet<GameObjectModel> _activeObjects = new HashSet<GameObjectModel>();
+
+    public HashSet<GameObjectModel> ActiveObjects => _activeObjects;
 
     public Grid(int cellSize, GraphicsDeviceManager graphics )
     {

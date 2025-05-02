@@ -22,7 +22,7 @@ public class BackGroundController : IController
         {
             Vector2 direction = new Vector2((float)Math.Sin(_player.Rotation), -(float)Math.Cos(_player.Rotation));
 
-            var position = direction *_player.CurrentSpeed * model.SpeedKoeff * deltaTime;
+            var position = direction *_player.CurrentSpeed * 1.5f * model.SpeedKoeff * deltaTime;
             model.SetPosition(position);
         }
     }

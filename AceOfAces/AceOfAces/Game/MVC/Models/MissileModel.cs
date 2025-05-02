@@ -8,7 +8,7 @@ public class MissileModel : GameObjectModel
 {
     private static Texture2D missileTexture;
 
-    private float _lifespan = 5f;
+    private float _lifespan = 3f;
 
     #region Speed
     private float _speed = 800f;
@@ -30,7 +30,7 @@ public class MissileModel : GameObjectModel
     #endregion
 
     #region Damage
-    private readonly int _damage = 50;
+    private readonly int _damage = 1;
     public int Damage => _damage;
     #endregion
 
@@ -86,6 +86,16 @@ public class MissileModel : GameObjectModel
     public void SetSource(GameObjectType source)
     {
         _source = source;
+    }
+
+    protected override Rectangle GetBounds()
+    {
+        return new Rectangle(
+            (int)(_position.X - _texture.Width / 2),
+            (int)(_position.Y - _texture.Height / 2),
+            _texture.Width,
+            _texture.Height
+        );
     }
 }
 

@@ -19,8 +19,8 @@ public class GameEngine : Game
 
     protected override void Initialize()
     {
-        _graphics.PreferredBackBufferWidth = /*1920;*/  1024;
-        _graphics.PreferredBackBufferHeight = /*1920;*/ 764;
+        _graphics.PreferredBackBufferWidth = 1920;  //1024;
+        _graphics.PreferredBackBufferHeight = 1080; //764;
         _graphics.ApplyChanges();
 
         _gameManager = new GameManager(_graphics,Content);

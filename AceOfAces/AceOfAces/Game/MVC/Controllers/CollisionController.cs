@@ -4,59 +4,29 @@ using AceOfAces.Models;
 using System;
 using System.Collections.Generic;
 
+namespace AceOfAces.Controllers;
+
 public class CollisionController : IController
 {
-    private readonly float collisionCooldownTime = 0.7f;
+    private readonly float collisionCooldownTime = 0.2f;
+    private readonly Dictionary<GameObjectModel, float> _collisionCooldowns = new Dictionary<GameObjectModel, float>();
+    
     private readonly Grid _grid;
 
-    private readonly PlayerModel _player;
-    private readonly List<EnemyModel> _enemies;
-    private readonly MissileListModel _missileList;
-
-    private readonly Dictionary<GameObjectModel, float> _collisionCooldowns = new Dictionary<GameObjectModel, float>();
-    private readonly HashSet<GameObjectModel> _activeObjects = new HashSet<GameObjectModel>();
-    
-    public CollisionController(Grid grid, PlayerModel player, MissileListModel missiles, List<EnemyModel> enemies)
+    public CollisionController(Grid grid)
     {
         _grid = grid;
-        _player = player;
-        _missileList = missiles;
-        _enemies = enemies;
     }
 
     public void Update(float deltaTime)
     {
-        UpdateActiveObjects();
-
-        RegisterObjectsInGrid();
-
         UpdateCooldowns(deltaTime);
         CheckCollisions();
     }
 
-    private void UpdateActiveObjects()
-    {
-        _activeObjects.Clear();
-        _activeObjects.Add(_player);
-        _activeObjects.UnionWith(_missileList.Missiles);
-        _activeObjects.UnionWith(_enemies);
-    }
-
-    private void RegisterObjectsInGrid()
-    {
-        foreach (var obj in _activeObjects)
-        {
-            if (!obj.IsDestroyed)
-            {
-                _grid.AddObject(obj);
-            }
-        }
-    }
-
     private void CheckCollisions()
     {
-
-        foreach (var objA in _activeObjects)
+        foreach (var objA in _grid.ActiveObjects)
         {
             if (objA.IsDestroyed) continue;
 

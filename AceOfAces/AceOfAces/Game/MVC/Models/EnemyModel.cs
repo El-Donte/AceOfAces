@@ -1,5 +1,4 @@
-﻿using AceOfAces.Core;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
@@ -7,36 +6,85 @@ namespace AceOfAces.Models;
 
 public class EnemyModel : GameObjectModel, ITarget
 {
-    private int _health = 100;
+    #region Health
+    private int _health = 2;
+    public int Health => _health; // Здоровье
+    #endregion
 
     #region Rotation
-    //public event Action<float> RotationChanged;
+    private readonly float _evasionAngle = MathHelper.ToRadians(60);
+    public float EvasionAngle => _evasionAngle;
 
-    private readonly float _rotationSpeed = 8f;
-    public float RotationSpeed => _rotationSpeed; // Скорость поворота
+    private readonly float _rotationSpeed = 1.3f;
+    public float RotationSpeed => _rotationSpeed;
 
-    protected float _rotation;
-    public float Rotation => _rotation; // Угол поворота
+    private float _rotation;
+    public float Rotation 
+    { 
+        get => _rotation;
+        set
+        {
+            _rotation = value;
+            //_collider.UpdateBounds(GetBounds());
+        }
+    }
     #endregion
 
     #region Speed
-    private float _currentSpeed = 60f;
-    public float CurrentSpeed => _currentSpeed; // Текущая скорость
+    private float _currentSpeed = 400f;
+    public float CurrentSpeed
+    {
+        get => _currentSpeed;
+        set => _currentSpeed = MathHelper.Clamp(_currentSpeed + value, MinSpeed, MaxSpeed);
+    }
 
-    private Vector2 _velocity;
-    public Vector2 Velocity => _velocity;
-
-    private readonly float _minSpeed = 60f;
-    public float MinSpeed => _minSpeed;
-
-    private readonly float _maxSpeed = 500f;
-    public float MaxSpeed => _maxSpeed;
-
-    private readonly float _acceleration = 400f;
+    private readonly float _acceleration = 100f;
     public float Acceleration => _acceleration;
 
-    private readonly float _decceleration = 100f;
-    public float Decceleration => _decceleration;
+    private readonly float _minSpeed = 400f;
+    public float MinSpeed => _minSpeed;
+
+    private readonly float _maxSpeed = 650f;
+    public float MaxSpeed => _maxSpeed;
+
+    private Vector2 _velocity = Vector2.Zero;
+    public Vector2 Velocity
+    {
+        get => _velocity;
+        set => _velocity = value;
+    }
+    #endregion
+
+    #region Target
+    private readonly float _pursuitRadius = 400f;
+    public float PursuitRadius => _pursuitRadius;
+
+    private readonly float _targetUpdateTime = 2f;
+    private float _targetTimer = 0f;
+    public float TargetTimer
+    {
+        get => _targetTimer;
+        set
+        {
+            if (_targetTimer >= _targetUpdateTime)
+            {
+                _targetTimer = 0;
+            }
+            else
+            {
+                _targetTimer = value;
+            }
+        }
+    }
+
+    private Vector2 _targetPosition;
+    public Vector2 TargetPosition
+    {
+        get => _targetPosition;
+        set => _targetPosition = value;
+    }
+
+    public bool IsPursuingPlayer { get; set; }
     #endregion
 
     #region Missile
@@ -59,6 +107,8 @@ public class EnemyModel : GameObjectModel, ITarget
             _firedMissileCount = value;
         }
     }
+
+    public float NoTargetTimer { get; set; }
     #endregion
 
     public EnemyModel(Texture2D texture, Vector2 position) : base(texture,position)
@@ -70,25 +120,6 @@ public class EnemyModel : GameObjectModel, ITarget
     {
         _position += position;
         _collider.UpdateBounds(GetBounds());
-    }
-
-    public void SetRotation(float rotation)
-    {
-        _rotation = rotation;
-    }
-
-    public void SetCurrentSpeed(float speed)
-    {
-        _currentSpeed = speed;
-    }
-
-    public void SetVelocity(Vector2 velocity)
-    {
-        _velocity += velocity;
-        if (_velocity.Length() > _maxSpeed)
-        {
-            _velocity = Vector2.Normalize(_velocity) * _maxSpeed;
-        }
     }
 
     public void TakeDamage(int damage)

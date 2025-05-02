@@ -1,5 +1,4 @@
-﻿using AceOfAces.Core;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
@@ -10,37 +9,49 @@ public class PlayerModel : GameObjectModel, ITarget
     #region Health
     public event Action<bool> OnDamagedEvent;
 
-    private int _health = 100;
+    private int _health = 4;
     public int Health => _health; // Здоровье
     #endregion
 
     #region Rotation
     //public event Action<float> RotationChanged;
 
-    private readonly float _rotationSpeed = 4f;
+    private readonly float _rotationSpeed = 5f;
     public float RotationSpeed => _rotationSpeed;
 
     protected float _rotation;
-    public float Rotation => _rotation; // Угол поворота
+    public float Rotation
+    {
+        get => _rotation;
+        set => _rotation = value;
+    }
     #endregion
 
     #region Speed
-    private float _currentSpeed = 60f;
-    public float CurrentSpeed => _currentSpeed; // Текущая скорость
+    private float _currentSpeed = 150f;
+    public float CurrentSpeed
+    {
+        get => _currentSpeed;
+        set => _currentSpeed =  MathHelper.Clamp(value, _minSpeed, _maxSpeed);
+    }
 
     private Vector2 _velocity;
-    public Vector2 Velocity => _velocity;
+    public Vector2 Velocity
+    {
+        get => _velocity;
+        set => _velocity = value;
+    }
 
-    private readonly float _minSpeed = 60f;
+    private readonly float _minSpeed = 100f;
     public float MinSpeed => _minSpeed;
 
-    private readonly float _maxSpeed = 500f;
+    private readonly float _maxSpeed = 300f;
     public float MaxSpeed => _maxSpeed;
 
-    private readonly float _acceleration = 400f;
+    private readonly float _acceleration = 200f;
     public float Acceleration => _acceleration;
 
-    private readonly float _decceleration = 100f;
+    private readonly float _decceleration = 150f;
     public float Decceleration => _decceleration;
     #endregion
 
@@ -109,21 +120,6 @@ public class PlayerModel : GameObjectModel, ITarget
         _position += position;
         _collider.UpdateBounds(GetBounds());
         PositionChangedEvent?.Invoke(_position);
-    }
-
-    public void SetRoration(float rotation)
-    {
-        _rotation += rotation;
-    }
-
-    public void SetCurrentSpeed(float speed)
-    {
-        _currentSpeed = MathHelper.Clamp(speed, _minSpeed, _maxSpeed);
-    }
-
-    public void SetVelocity(Vector2 velocity)
-    {
-        _velocity = velocity;
     }
 
     public void TakeDamage(int damage)

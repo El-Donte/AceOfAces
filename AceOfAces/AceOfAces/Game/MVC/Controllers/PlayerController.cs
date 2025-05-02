@@ -3,6 +3,7 @@ using AceOfAces.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Collections.Generic;
 
 namespace AceOfAces.Controllers;
 
@@ -12,9 +13,9 @@ public class PlayerController : IController
     private readonly PlayerModel _model;
 
     private Vector2 _inputDirection;
-    private EnemyModel _enemy;
+    private List<EnemyModel> _enemy;
 
-    public PlayerController(PlayerModel playerModel,MissileListModel missileList, EnemyModel enemyModel)
+    public PlayerController(PlayerModel playerModel,MissileListModel missileList, List<EnemyModel> enemyModel)
     {
         _model = playerModel;
         _missiles = missileList;
@@ -35,24 +36,20 @@ public class PlayerController : IController
 
     private void UpdateMovement(float deltaTime)
     {
-        _model.SetRoration(_inputDirection.X * _model.RotationSpeed * deltaTime);
+        _model.Rotation += _inputDirection.X * _model.RotationSpeed * deltaTime;
 
         bool isAccelerating = _inputDirection.Y > 0;
         UpdateSpeed(isAccelerating ? 1 : 2, !isAccelerating, deltaTime);
 
         Vector2 direction = new Vector2((float)Math.Sin(_model.Rotation), -(float)Math.Cos(_model.Rotation));
-        _model.SetVelocity((_inputDirection.Y + 2) * direction * _model.CurrentSpeed);
+        _model.Velocity = (_inputDirection.Y + 2) * direction * _model.CurrentSpeed;
 
         _model.SetPosition(_model.Velocity * deltaTime);
     }
 
     private void UpdateSpeed(int k, bool isBreaking, float deltaTime)
     {
-        var currentSpeed = _model.CurrentSpeed;
-
-        currentSpeed += k * (isBreaking ? -_model.Decceleration : _model.Acceleration) * deltaTime;
-
-        _model.SetCurrentSpeed(currentSpeed);
+        _model.CurrentSpeed += k * (isBreaking ? -_model.Decceleration : _model.Acceleration) * deltaTime;
     }
 
     private void InputUpdate()
@@ -67,7 +64,7 @@ public class PlayerController : IController
             (_missiles.Cooldowns[0].AvailableToFire || 
              _missiles.Cooldowns[1].AvailableToFire))
         {
-            _missiles.CreateMissile(_model.Position + _model.MissileJointPosition, _enemy, Core.GameObjectType.Player);
+            _missiles.CreateMissile(_model.Position + _model.MissileJointPosition, _enemy[0], Core.GameObjectType.Player);
             _model.FiredMissileCount++;
         }
     }

@@ -50,13 +50,13 @@ public abstract class GameObjectModel : IDisposable
         DestroyedEvent = null;
     }
 
-    protected Rectangle GetBounds()
+    protected virtual Rectangle GetBounds()
     {
         return new Rectangle(
-            (int)_position.X - _texture.Width / 4,
-            (int)_position.Y - _texture.Height / 4,
-            _texture.Width / 2,
-            _texture.Height / 2
+            (int)(_position.X - _texture.Width  / 3.2),
+            (int)(_position.Y - _texture.Height / 3.2),
+            (int)(_texture.Width / 1.5) ,
+            (int)(_texture.Height / 1.5)
         );
     }
 }

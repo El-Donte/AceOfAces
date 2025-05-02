@@ -17,9 +17,10 @@ public class DebugView : IView
 
     public SpriteBatch SpriteBatch { get; set; }
 
-    public DebugView(Texture2D pixelTexture, Grid grid, List<ColliderModel> colliders, MissileListModel missileList)
+    public DebugView(GraphicsDeviceManager graphics, Grid grid, List<ColliderModel> colliders, MissileListModel missileList)
     {
-        _pixelTexture = pixelTexture;
+        _pixelTexture = new Texture2D(graphics.GraphicsDevice, 1, 1);
+        _pixelTexture.SetData(new[] { Color.White });
         _grid = grid;
         _colliders = colliders;
         _missileList = missileList;
@@ -41,7 +42,6 @@ public class DebugView : IView
             DrawRectangle(missile.Collider.Bounds, Color.Blue);
         }
     }
-
 
     private void DrawGrid()
     {

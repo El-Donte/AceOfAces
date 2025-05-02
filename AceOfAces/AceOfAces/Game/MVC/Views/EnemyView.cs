@@ -1,31 +1,36 @@
 ﻿using AceOfAces.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 
 namespace AceOfAces.Views;
 
 public class EnemyView : IView
 {
-    private readonly EnemyModel _model;
+    private readonly List<EnemyModel> _model;
     public SpriteBatch SpriteBatch { get; set; }
 
-    public EnemyView(EnemyModel model)
+    public EnemyView(List<EnemyModel> model)
     {
         _model = model;
     }
 
     public void Draw()
     {
-        SpriteBatch.Draw(
-            _model.Texture,
-            _model.Position,
-            null,
-            Color.White,
-            _model.Rotation,
-            _model.Origin,
-            1,
-            SpriteEffects.None,
-            0f);
+        for (int i = 0; i < _model.Count; i++)
+        {
+            var model = _model[i];
+            SpriteBatch.Draw(
+                model.Texture,
+                model.Position,
+                null,
+                Color.White,
+                model.Rotation + MathHelper.PiOver2,
+                model.Origin,
+                1,
+                SpriteEffects.None,
+                0f);
+        }
     }
 }
 

@@ -12,14 +12,14 @@ namespace AceOfAces.Managers;
 
 public class GameManager
 {
-    public static bool IsDebugMode { get; set; } = false;
-
     private readonly List<IView> _views = new List<IView>();
     private readonly List<IController> _controllers = new List<IController>();
     
     private readonly SpriteBatch _spriteBatch;
     private readonly Camera camera;
     private readonly Grid _grid;
+
+    public static bool IsDebugMode { get; set; } = false;
 
     public GameManager(GraphicsDeviceManager graphics, ContentManager contentManager)
     {
@@ -28,25 +28,20 @@ public class GameManager
         _grid = new Grid(64, graphics);
         camera = new Camera(graphics.GraphicsDevice.Viewport);
 
-        var pixelTexture = new Texture2D(graphics.GraphicsDevice, 1, 1);
-        pixelTexture.SetData(new[] { Color.White });
-
         #region Models
         var startPos = new Vector2(graphics.GraphicsDevice.Viewport.Width / 2, graphics.GraphicsDevice.Viewport.Height / 2);
         var playerModel = new PlayerModel(contentManager.Load<Texture2D>("jets/jet"), startPos);
         playerModel.PositionChangedEvent += camera.SetPosition;
         playerModel.PositionChangedEvent += _grid.UpdateGridPosition;
 
-        var enemyModel = new EnemyModel(contentManager.Load<Texture2D>("jets/jet"), Vector2.Zero);
+        var enemyModel = new EnemyModel(contentManager.Load<Texture2D>("jets/jet"), startPos + new Vector2(-500, -500));
+        var enemyModel2 = new EnemyModel(contentManager.Load<Texture2D>("jets/jet"), startPos + new Vector2(500, 500));
 
         var layers = new List<BackgroundModel> {
             new BackgroundModel(contentManager.Load<Texture2D>("Clouds/Clouds1"), 0.6f, 0.5f, graphics.GraphicsDevice.Viewport),
             new BackgroundModel(contentManager.Load<Texture2D>("Clouds/Clouds2"), 0.8f, 1f, graphics.GraphicsDevice.Viewport),
             new BackgroundModel(contentManager.Load<Texture2D>("Clouds/Clouds3"), 1.1f, 1.4f, graphics.GraphicsDevice.Viewport)
         };
-
-        var missileCooldownTexture = contentManager.Load<Texture2D>("missileCooldown");
-        var missileTexture = contentManager.Load<Texture2D>("missile");
 
         var cooldowns = new List<MissileCooldownModel>();
         for (int i = 0; i < 2; i++)
@@ -57,31 +52,38 @@ public class GameManager
 
         var colliders = new List<ColliderModel>(){
             playerModel.Collider,
-            enemyModel.Collider
+            enemyModel.Collider,
+            enemyModel2.Collider
         };
         #endregion
 
+        var list = new List<EnemyModel>() { enemyModel, enemyModel2 };
+
         #region Controllers
-        _controllers.Add(new PlayerController(playerModel, missles, enemyModel));
-        _controllers.Add(new EnemyController(enemyModel,playerModel));
+        _controllers.Add(new PlayerController(playerModel, missles, list));
+        _controllers.Add(new EnemyController(list, playerModel));
         _controllers.Add(new MissileController(missles));
-        _controllers.Add(new CollisionController(_grid, playerModel, missles, new List<EnemyModel>() { enemyModel }));
+        _controllers.Add(new CollisionController(_grid));
+        _controllers.Add(new GridController(_grid, playerModel, missles,list));
         _controllers.Add(new BackGroundController(layers, playerModel));
         #endregion
 
         #region Views
+        var missileCooldownTexture = contentManager.Load<Texture2D>("missileCooldown");
+        var missileTexture = contentManager.Load<Texture2D>("missile");
         MissileModel.SetTerxture(missileTexture);
+
         _views.Add(new BackgroundView(layers, playerModel) { SpriteBatch = _spriteBatch });
         _views.Add(new PlayerView(playerModel, missileTexture, cooldowns) {SpriteBatch = _spriteBatch});
-        _views.Add(new EnemyView(enemyModel) { SpriteBatch = _spriteBatch });
+        _views.Add(new EnemyView(list) { SpriteBatch = _spriteBatch });
         _views.Add(new MissilesView(missles) { SpriteBatch = _spriteBatch });
-        _views.Add(new DebugView(pixelTexture, _grid, colliders, missles) { SpriteBatch = _spriteBatch });
+        _views.Add(new DebugView(graphics, _grid, colliders, missles) { SpriteBatch = _spriteBatch });
  
         for (int i = 0; i < missles.Cooldowns.Count; i++)
         {
             var screenMargin = new Vector2(20 + 60 * i, 50);
 
-            var bar  = new CooldownBarView(model: missles.Cooldowns[i],texture: missileCooldownTexture, screenMargin: screenMargin)
+            var bar  = new CooldownBarView(missles.Cooldowns[i], missileCooldownTexture, screenMargin)
             { Camera = camera, GraphicsDevice = graphics.GraphicsDevice, SpriteBatch = _spriteBatch };
 
             _views.Add(bar);

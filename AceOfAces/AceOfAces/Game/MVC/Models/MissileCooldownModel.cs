@@ -1,22 +1,36 @@
-﻿
-namespace AceOfAces.Models;
+﻿namespace AceOfAces.Models;
 
 public class MissileCooldownModel
 {
-    public bool AvailableToFire { get; set; } = true;
-    public float Timer { get; set; }
-    public float CooldownTime { get; }
-    public float Progress => AvailableToFire ? 1f : 1f - (Timer / CooldownTime);
+    private bool _availableToFire = true;
+    public bool AvailableToFire => _availableToFire;
+
+    private float _timer;
+    public float Timer 
+    {
+        get => _timer;
+        set
+        {
+            _timer = value;
+            if (_timer <= 0)
+            {
+                _availableToFire = true;
+            }
+        }
+    }
+
+    private readonly float _cooldownTime;
+    public float Progress => _availableToFire ? 1f : 1f - (_timer / _cooldownTime);
 
     public MissileCooldownModel(float cooldownTime)
     {
-        CooldownTime = cooldownTime;
+        _cooldownTime = cooldownTime;
     }
 
     public void StartCooldown()
     {
-        AvailableToFire = false;
-        Timer = CooldownTime;
+        _availableToFire = false;
+        Timer = _cooldownTime;
     }
 }
 

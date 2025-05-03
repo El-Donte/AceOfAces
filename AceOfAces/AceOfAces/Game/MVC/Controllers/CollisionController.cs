@@ -1,5 +1,4 @@
-﻿using AceOfAces.Controllers;
-using AceOfAces.Core;
+﻿using AceOfAces.Core;
 using AceOfAces.Models;
 using System;
 using System.Collections.Generic;
@@ -9,7 +8,7 @@ namespace AceOfAces.Controllers;
 public class CollisionController : IController
 {
     private readonly float collisionCooldownTime = 0.2f;
-    private readonly Dictionary<GameObjectModel, float> _collisionCooldowns = new Dictionary<GameObjectModel, float>();
+    private readonly Dictionary<GameObjectModel, float> _collisionCooldowns = [];
     
     private readonly Grid _grid;
 
@@ -34,17 +33,13 @@ public class CollisionController : IController
 
             foreach (var objB in nearbyObjects)
             {
-                if (CanSkipCollisionCheck(objA, objB))
-                {
-                    continue;
-                }
+                if (CanSkipCollisionCheck(objA, objB)) continue;
 
                 if (objA.Collider.Bounds.Intersects(objB.Collider.Bounds))
                 {
                     HandleCollision(objA, objB);
                     StartCooldown(objA, objB);
                 }
-                
             }
         }
     }
@@ -113,7 +108,9 @@ public class CollisionController : IController
     private void HandleMissileCollision(MissileModel missile, GameObjectModel other)
     {
         if (other is MissileModel || IsFriendlyFire(missile, other))
+        {
             return;
+        }
 
         switch (other)
         {

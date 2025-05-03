@@ -4,11 +4,11 @@ using System;
 
 namespace AceOfAces.Models;
 
-public abstract class GameObjectModel : IDisposable
+public class GameObjectModel : IDisposable
 {
     #region Texture
     protected readonly Texture2D _texture;
-    public Texture2D Texture => _texture; //текстура
+    public Texture2D Texture => _texture;
     #endregion
 
     #region Collisions

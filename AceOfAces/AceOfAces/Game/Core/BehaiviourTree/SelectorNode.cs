@@ -19,4 +19,3 @@ public class SelectorNode : Node
         return false;
     }
 }
-

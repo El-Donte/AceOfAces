@@ -9,9 +9,5 @@ public class Node
 
     public void AddChild(Node child) => Children.Add(child);
 
-    public virtual bool Evaluate(EnemyModel enemy, float deltaTime)
-    {
-        return false;
-    }
+    public virtual bool Evaluate(EnemyModel enemy, float deltaTime) => false;
 }
-

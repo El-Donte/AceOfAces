@@ -4,16 +4,14 @@ namespace AceOfAces.Models;
 
 public class ColliderModel
 {
-    public Rectangle Bounds { get; private set; }
+    private Rectangle _bounds;
+    public Rectangle Bounds => _bounds;
 
-    public ColliderModel(Rectangle bounds)
-    {
-        Bounds = bounds;
-    }
+    public ColliderModel(Rectangle bounds) => _bounds = bounds;
 
     public void UpdateBounds(Rectangle newBounds)
     {
-        Bounds = newBounds;
+        _bounds = newBounds;
     }
 }
 

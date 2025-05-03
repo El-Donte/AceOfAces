@@ -8,27 +8,28 @@ namespace AceOfAces.Controllers;
 
 public class EnemyController : IController
 {
+    private readonly EnemyBehaiviourTreeBuilder _builder;
+    private readonly List<Node> _decisionTrees = [];
+    private readonly Random _random = new();
+
     private readonly List<EnemyModel> _enemies;
-    private readonly EnemyBehaiviourTree _decisionTree;
-    private readonly List<Node> _decisionTrees = new List<Node>();
     private readonly PlayerModel _player;
-    private Random _random = new Random();
+    private readonly MissileListModel _missiles;
 
-    private readonly ActionNode updateTargetAction;
-    private readonly ActionNode moveAction;
-    private readonly ActionNode checkEvasionAction;
-    private readonly ActionNode generateNewTargetAction;
-
-    public EnemyController(List<EnemyModel> models, PlayerModel player)
+    public EnemyController(List<EnemyModel> models, PlayerModel player, MissileListModel missiles)
     {
         _enemies = models;
-        _decisionTree = new EnemyBehaiviourTree(player);
         _player = player;
+        _missiles = missiles;
 
-        updateTargetAction = new ActionNode((enemy, dt) => UpdateTarget(enemy));
-        moveAction = new ActionNode((enemy, dt) => Move(enemy, dt));
-        checkEvasionAction = new ActionNode((enemy, dt) => CheckEvasion(enemy, dt));
-        generateNewTargetAction = new ActionNode((enemy, dt) => GenerateNewTarget(enemy));
+        var updateTargetAction = new ActionNode((enemy, dt) => UpdateTarget(enemy));
+        var moveAction = new ActionNode((enemy, dt) => Move(enemy, dt));
+        var checkEvasionAction = new ActionNode((enemy, dt) => CheckEvasion(enemy, dt));
+        var generateNewTargetAction = new ActionNode((enemy, dt) => GenerateNewTarget(enemy));
+        var fireAction = new ActionNode((enemy, dt) => Fire(enemy));
+
+        _builder = new EnemyBehaiviourTreeBuilder(player, updateTargetAction, moveAction, 
+                    checkEvasionAction, generateNewTargetAction, fireAction);
 
         CreateNewBehaiviourTree();
     }
@@ -47,10 +48,8 @@ public class EnemyController : IController
         _decisionTrees.Clear();
         foreach (var enemy in _enemies)
         {
-            _decisionTrees.Add(_decisionTree.CreateBehaiviourTree(
-                updateTargetAction, moveAction, 
-                checkEvasionAction, generateNewTargetAction
-                ));
+            _missiles.AddCooldown(enemy.Cooldowns);
+            _decisionTrees.Add(_builder.CreateBehaiviourTree());
         }
     }
 
@@ -101,23 +100,51 @@ public class EnemyController : IController
 
     private void CheckEvasion(EnemyModel enemy, float deltaTime)
     {
-        if (!enemy.IsPursuingPlayer)
-        {
-            return;
-        }
+        if (!enemy.IsPursuingPlayer) return;
 
         Vector2 toPlayer = _player.Position - enemy.Position;
         float angleToPlayer = (float)Math.Atan2(toPlayer.Y, toPlayer.X);
         float angleDiff = MathHelper.WrapAngle(angleToPlayer - enemy.Rotation);
 
-        float speed = enemy.Acceleration * deltaTime;
+        bool isEvading = false;
         if (Math.Abs(angleDiff) > enemy.EvasionAngle)
         {
             float evasionDirection = Math.Sign(angleDiff);
-            enemy.Rotation += enemy.RotationSpeed * 1.5f * deltaTime * evasionDirection;
-            speed *= 1.5f;
+            enemy.Rotation += enemy.RotationSpeed * 2f * deltaTime * evasionDirection;
+            isEvading = true;
         }
 
-        enemy.CurrentSpeed = speed;
+        float speed = enemy.Acceleration * deltaTime;
+        enemy.SetCurrentSpeed(speed, isEvading);
+    }
+
+    private void Fire(EnemyModel enemy)
+    {
+        if (!IsPlayerInFieldOfView(enemy)) return;
+
+        if (enemy.Cooldowns[0].AvailableToFire ||
+             enemy.Cooldowns[1].AvailableToFire)
+        {
+            _missiles.CreateMissile(enemy.Position + enemy.MissileJointPosition, enemy, _player);
+            enemy.FiredMissileCount++;        
+        }
+
+    }
+
+    private bool IsPlayerInFieldOfView(EnemyModel enemy)
+    {
+        Vector2 toPlayer = _player.Position - enemy.Position;
+        if (toPlayer.LengthSquared() == 0) return false;
+
+        toPlayer.Normalize();
+
+        Vector2 forward = new(
+            (float)Math.Cos(enemy.Rotation),
+            (float)Math.Sin(enemy.Rotation)
+        );
+
+        float angleToPlayer = (float)Math.Acos(Vector2.Dot(forward, toPlayer));
+
+        return Math.Abs(angleToPlayer) <= enemy.FieldOfViewAngle / 2f;
     }
 }

@@ -7,6 +7,7 @@ public static class InputManager
 {
     private static KeyboardState _currentState;
     private static KeyboardState _previousState;
+
     private static Vector2 _inputDirection;
     public static Vector2 InputDirection => _inputDirection;
 
@@ -14,10 +15,8 @@ public static class InputManager
     {
         _previousState = _currentState;
         _currentState = Keyboard.GetState();
-        var keyboardState = Keyboard.GetState();
 
         _inputDirection = Vector2.Zero;
-
         if (IsKeyDown(Keys.W)) _inputDirection.Y++;
         if (IsKeyDown(Keys.S)) _inputDirection.Y--;
         if (IsKeyDown(Keys.A)) _inputDirection.X--;

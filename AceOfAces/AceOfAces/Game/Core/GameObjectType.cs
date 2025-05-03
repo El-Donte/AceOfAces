@@ -6,4 +6,3 @@ public enum GameObjectType
     Enemy,
     Missile
 }
-

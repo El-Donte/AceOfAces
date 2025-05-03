@@ -19,5 +19,3 @@ public class SequenceNode : Node
         return true;
     }
 }
-
-

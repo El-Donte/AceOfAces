@@ -7,29 +7,29 @@ namespace AceOfAces.Views;
 
 public class BackgroundView : IView
 {
-    private readonly List<BackgroundModel> _models;
-    private readonly PlayerModel _playerModel;
+    private readonly List<LayerModel> _layers;
+    private readonly PlayerModel _player;
 
     public SpriteBatch SpriteBatch { get; set; }
 
-    public BackgroundView(List<BackgroundModel> models, PlayerModel playerModel)
+    public BackgroundView(List<LayerModel> layers, PlayerModel player)
     {
-        _models = models;
-        _playerModel = playerModel;
+        _layers = layers;
+        _player = player;
     }
 
     public void Draw()
     {
-        foreach(var model in _models)
+        foreach(var layer in _layers)
         {
             SpriteBatch.Draw(
-                model.Texture, 
-                _playerModel.Position,
-                model.Rectangle, 
+                layer.Texture, 
+                _player.Position,
+                layer.Bounds, 
                 Color.White,
                 0,
-                model.Origin,
-                model.Zoom,
+                layer.Origin,
+                layer.Zoom,
                 SpriteEffects.None,
                 1
             );

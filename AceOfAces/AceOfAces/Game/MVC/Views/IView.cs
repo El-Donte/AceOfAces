@@ -8,4 +8,3 @@ public interface IView
 
     public abstract void Draw();
 }
-

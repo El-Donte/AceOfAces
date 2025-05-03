@@ -12,18 +12,20 @@ public class DebugView : IView
     private readonly Texture2D _pixelTexture;
 
     private readonly Grid _grid;
-    private readonly List<ColliderModel> _colliders;
+    private readonly List<EnemyModel> _enemies;
     private readonly MissileListModel _missileList;
+    private readonly PlayerModel _player;
 
     public SpriteBatch SpriteBatch { get; set; }
 
-    public DebugView(GraphicsDeviceManager graphics, Grid grid, List<ColliderModel> colliders, MissileListModel missileList)
+    public DebugView(GraphicsDeviceManager graphics, Grid grid, PlayerModel player ,List<EnemyModel> enemies, MissileListModel missileList)
     {
         _pixelTexture = new Texture2D(graphics.GraphicsDevice, 1, 1);
-        _pixelTexture.SetData(new[] { Color.White });
+        _pixelTexture.SetData([Color.White]);
         _grid = grid;
-        _colliders = colliders;
+        _enemies = enemies;
         _missileList = missileList;
+        _player = player;
     }
 
     public void Draw()
@@ -32,9 +34,11 @@ public class DebugView : IView
 
         DrawGrid();
 
-        foreach (var collider in _colliders)
+        DrawRectangle(_player.Collider.Bounds, Color.Green);
+
+        foreach (var enemy in _enemies)
         {
-            DrawRectangle(collider.Bounds, Color.Red);
+            DrawRectangle(enemy.Collider.Bounds, Color.Red);
         }
 
         foreach (var missile in _missileList.Missiles)

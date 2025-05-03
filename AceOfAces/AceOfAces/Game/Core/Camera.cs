@@ -3,18 +3,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace AceOfAces.Core;
 
-public class Camera
+public class Camera(Viewport viewport)
 {
-    private Viewport viewport;
     private Vector2 _position = Vector2.Zero;
 
     public Matrix TransformMatrix => GetTranformation();
-
-    public Camera(Viewport viewport)
-    {
-        _position = Vector2.Zero;
-        this.viewport = viewport;
-    }
 
     public void SetPosition(Vector2 position)
     {
@@ -30,4 +23,3 @@ public class Camera
             );
     }
 }
-

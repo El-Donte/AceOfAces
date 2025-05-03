@@ -7,6 +7,7 @@ namespace AceOfAces.Views;
 public class MissilesView : IView
 {
     private readonly MissileListModel _missileList;
+
     public SpriteBatch SpriteBatch { get; set; }
 
     public MissilesView(MissileListModel missileList)

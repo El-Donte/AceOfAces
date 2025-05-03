@@ -2,44 +2,41 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
 
 namespace AceOfAces.Views;
 
 public class PlayerView : IView
 {
-    private readonly List<MissileCooldownModel> _missileCooldowns = new List<MissileCooldownModel>();
     private readonly Texture2D _missileTexture;
     private readonly Vector2 _missileOrigin;
 
-    private readonly PlayerModel _model;
+    private readonly PlayerModel _player;
     private float _alpha = 1f;
 
     public SpriteBatch SpriteBatch { get; set; }
 
-    public PlayerView(PlayerModel playerModel, Texture2D missileTexture, List<MissileCooldownModel> cooldowns)
+    public PlayerView(PlayerModel playerModel, Texture2D missileTexture)
     {
-        _model = playerModel;
+        _player = playerModel;
 
-        _missileCooldowns = cooldowns;
         _missileTexture = missileTexture;
         _missileOrigin = new Vector2(_missileTexture.Width / 2, _missileTexture.Height / 2);
 
-        _model.OnBlinkPhaseChangedEvent += SetAlpha;
+        _player.OnBlinkPhaseChangedEvent += SetAlpha;
     }
 
     public void Draw()
     {
         Color color = Color.White * _alpha;
 
-        if (_missileCooldowns[0].AvailableToFire)
+        if (_player.Cooldowns[0].AvailableToFire)
         {
-            DrawMissile(-_model.MissileJointPosition, color);
+            DrawMissile(-_player.MissileJointPosition, color);
         }
 
-        if (_missileCooldowns[1].AvailableToFire)
+        if (_player.Cooldowns[1].AvailableToFire)
         {
-            DrawMissile(_model.MissileJointPosition, color);
+            DrawMissile(_player.MissileJointPosition, color);
         }
 
         DrawPlayer(color);
@@ -49,10 +46,10 @@ public class PlayerView : IView
     {
         SpriteBatch.Draw(
             _missileTexture,
-            _model.Position + offset,
+            _player.Position + offset,
             null,
             color,
-            _model.Rotation,
+            _player.Rotation,
             _missileOrigin,
             1f,
             SpriteEffects.None,
@@ -63,12 +60,12 @@ public class PlayerView : IView
     private void DrawPlayer(Color color)
     {
         SpriteBatch.Draw(
-            _model.Texture,
-            _model.Position,
+            _player.Texture,
+            _player.Position,
             null,
             color,
-            _model.Rotation,
-            _model.Origin,
+            _player.Rotation,
+            _player.Origin,
             1f,
             SpriteEffects.None,
             0f

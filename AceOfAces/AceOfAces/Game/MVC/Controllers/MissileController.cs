@@ -4,15 +4,8 @@ using System;
 
 namespace AceOfAces.Controllers;
 
-public class MissileController : IController
+public class MissileController(MissileListModel _missilesList) : IController
 {
-    private MissileListModel _missilesList;
-
-    public MissileController(MissileListModel missiles)
-    {
-        _missilesList = missiles;
-    }
-
     public void Update(float deltaTime)
     {
         UpdateCooldowns(deltaTime);
@@ -25,10 +18,7 @@ public class MissileController : IController
         {
             var missile = _missilesList.Missiles[i];
 
-            if (missile.IsDestroyed || missile.Target == null)
-            {
-                continue;
-            }
+            if (missile.IsDestroyed || missile.Target == null) continue;
 
             Vector2 predictedPos = GetPredictedPosition(missile);
             Vector2 desiredDirection = GetDesiredDirection(missile, predictedPos);
@@ -37,7 +27,7 @@ public class MissileController : IController
             UpdateMissileRotation(missile);
 
             missile.SetPosition(missile.Velocity * deltaTime);
-            missile.ReduceLifespan(deltaTime);
+            missile.Lifespan -= deltaTime;
         }
     }
 
@@ -66,35 +56,24 @@ public class MissileController : IController
 
     private void UpdateMissileVelocity(MissileModel missile, Vector2 desiredDirection, float deltaTime)
     {
-        Vector2 velocity = (desiredDirection - missile.Velocity) * missile.RotationSpeed * deltaTime;
-        missile.SetVelocity(velocity);
+        missile.Velocity += (desiredDirection - missile.Velocity) * missile.RotationSpeed * deltaTime;
     }
 
     private void UpdateMissileRotation(MissileModel missile)
     {
-        float rotation = 0f;
         if (missile.Velocity.LengthSquared() > 0.1f)
         {
-            rotation = (float)Math.Atan2(missile.Velocity.Y, missile.Velocity.X);
+            missile.Rotation = (float)Math.Atan2(missile.Velocity.Y, missile.Velocity.X);
         }
-        missile.SetRotation(rotation);
     }
 
     private void UpdateCooldowns(float deltaTime)
     {
         foreach (var cooldown in _missilesList.Cooldowns)
         {
-            if (cooldown.AvailableToFire)
-            {
-                continue;
-            }
+            if (cooldown.AvailableToFire) continue;
 
             cooldown.Timer -= deltaTime;
-
-            if (cooldown.Timer <= 0)
-            {
-                cooldown.AvailableToFire = true;
-            }
         }
     }
 }

@@ -7,22 +7,23 @@ namespace AceOfAces.Views;
 
 public class BackgroundView : IView
 {
+    private readonly SpriteBatch _spriteBatch;
+
     private readonly List<LayerModel> _layers;
     private readonly PlayerModel _player;
 
-    public SpriteBatch SpriteBatch { get; set; }
-
-    public BackgroundView(List<LayerModel> layers, PlayerModel player)
+    public BackgroundView(List<LayerModel> layers, PlayerModel player, SpriteBatch spriteBatch)
     {
         _layers = layers;
         _player = player;
+        _spriteBatch = spriteBatch;
     }
 
     public void Draw()
     {
         foreach(var layer in _layers)
         {
-            SpriteBatch.Draw(
+            _spriteBatch.Draw(
                 layer.Texture, 
                 _player.Position,
                 layer.Bounds, 

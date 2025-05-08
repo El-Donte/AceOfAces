@@ -23,7 +23,7 @@ public class Grid
     private readonly int _height;
     public int Height => _height;
 
-    private readonly HashSet<GameObjectModel> _activeObjects = new();
+    private readonly HashSet<GameObjectModel> _activeObjects = [];
     public HashSet<GameObjectModel> ActiveObjects => _activeObjects;
 
     public Grid(int cellSize, GraphicsDeviceManager graphics )

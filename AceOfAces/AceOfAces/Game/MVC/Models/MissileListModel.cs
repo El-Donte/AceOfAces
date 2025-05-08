@@ -11,7 +11,15 @@ public class MissileListModel
     private readonly List<MissileCooldownModel> _cooldowns = [];
     public List<MissileCooldownModel> Cooldowns => _cooldowns;
 
-    public void AddCooldown(List<MissileCooldownModel> cooldowns) => _cooldowns.AddRange(cooldowns);
+    public void AddCooldowns(List<MissileCooldownModel> cooldowns) => _cooldowns.AddRange(cooldowns);
+
+    public void RemoveCooldowns(List<MissileCooldownModel> cooldowns)
+    {
+        foreach (var cooldown in cooldowns)
+        {
+            _cooldowns.Remove(cooldown);
+        }
+    }
 
     public void CreateMissile(Vector2 position,ITarget source, ITarget target)
     {

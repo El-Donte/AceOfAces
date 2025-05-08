@@ -1,4 +1,5 @@
 ﻿using AceOfAces.Core;
+using AceOfAces.Managers;
 using AceOfAces.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -8,22 +9,24 @@ namespace AceOfAces.Views;
 public class CooldownBarView : IView
 {
     private readonly MissileCooldownModel _cooldown;
-    private readonly Texture2D _texture;
+    private readonly Texture2D _cooldownTexture = AssetsManager.CooldownTexture;
+
     private readonly Vector2 _screenMargin;
     private readonly int _width;
     private readonly int _height;
 
-    public SpriteBatch SpriteBatch { get; set; }
+    private readonly SpriteBatch _spriteBatch;
+
     public Camera Camera { get; set; }
     public GraphicsDevice GraphicsDevice { get; set; }
 
-    public CooldownBarView(MissileCooldownModel cooldown,Texture2D texture,Vector2 screenMargin)
+    public CooldownBarView(MissileCooldownModel cooldown,Vector2 screenMargin, SpriteBatch spriteBatch)
     {
         _cooldown = cooldown;
-        _texture = texture;
-        _width = texture.Width;
-        _height = texture.Height;
+        _width = _cooldownTexture.Width;
+        _height = _cooldownTexture.Height;
         _screenMargin = screenMargin;
+        _spriteBatch = spriteBatch;
     }
 
     public void Draw()
@@ -36,7 +39,7 @@ public class CooldownBarView : IView
         Matrix invertedMatrix = Matrix.Invert(Camera.TransformMatrix);
         screenPosition = Vector2.Transform(screenPosition, invertedMatrix);
 
-        SpriteBatch.Draw(_texture, screenPosition, null, Color.White * 0.5f, 0f, Vector2.Zero, 1f, SpriteEffects.None,0f);
+        _spriteBatch.Draw(_cooldownTexture, screenPosition, null, Color.White * 0.5f, 0f, Vector2.Zero, 1f, SpriteEffects.None,0f);
 
         int fillHeight = (int)(_height * _cooldown.Progress);
         Rectangle sourceRect = new(
@@ -51,6 +54,6 @@ public class CooldownBarView : IView
             screenPosition.Y + (_height - fillHeight)
         );
 
-        SpriteBatch.Draw(_texture, fillPosition, sourceRect, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+        _spriteBatch.Draw(_cooldownTexture, fillPosition, sourceRect, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
     }
 }

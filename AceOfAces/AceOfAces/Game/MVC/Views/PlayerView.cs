@@ -1,4 +1,5 @@
-﻿using AceOfAces.Models;
+﻿using AceOfAces.Managers;
+using AceOfAces.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -7,20 +8,24 @@ namespace AceOfAces.Views;
 
 public class PlayerView : IView
 {
-    private readonly Texture2D _missileTexture;
+    private readonly Texture2D _missileTexture = AssetsManager.MissileTexture;
     private readonly Vector2 _missileOrigin;
+    private readonly Texture2D _playerTexture = AssetsManager.PlayerTexture;
+    private readonly Vector2 _playerOrigin;
 
     private readonly PlayerModel _player;
     private float _alpha = 1f;
 
-    public SpriteBatch SpriteBatch { get; set; }
+    private readonly SpriteBatch _spriteBatch;
 
-    public PlayerView(PlayerModel playerModel, Texture2D missileTexture)
+    public PlayerView(PlayerModel playerModel, SpriteBatch spriteBatch)
     {
         _player = playerModel;
 
-        _missileTexture = missileTexture;
-        _missileOrigin = new Vector2(_missileTexture.Width / 2, _missileTexture.Height / 2);
+        _missileOrigin = new Vector2(_missileTexture.Width / 2f, _missileTexture.Height / 2f);
+        _playerOrigin = new Vector2(_playerTexture.Width / 2f, _playerTexture.Height / 2f + 10);
+
+        _spriteBatch = spriteBatch;
 
         _player.OnBlinkPhaseChangedEvent += SetAlpha;
     }
@@ -44,7 +49,7 @@ public class PlayerView : IView
 
     private void DrawMissile(Vector2 offset, Color color)
     {
-        SpriteBatch.Draw(
+        _spriteBatch.Draw(
             _missileTexture,
             _player.Position + offset,
             null,
@@ -59,13 +64,13 @@ public class PlayerView : IView
 
     private void DrawPlayer(Color color)
     {
-        SpriteBatch.Draw(
-            _player.Texture,
+        _spriteBatch.Draw(
+            _playerTexture,
             _player.Position,
             null,
             color,
             _player.Rotation,
-            _player.Origin,
+            _playerOrigin,
             1f,
             SpriteEffects.None,
             0f

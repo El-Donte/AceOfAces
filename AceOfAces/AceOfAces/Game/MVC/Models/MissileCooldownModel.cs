@@ -33,4 +33,3 @@ public class MissileCooldownModel
         Timer = _cooldownTime;
     }
 }
-

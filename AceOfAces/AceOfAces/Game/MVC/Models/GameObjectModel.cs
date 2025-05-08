@@ -1,16 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 
 namespace AceOfAces.Models;
 
 public class GameObjectModel : IDisposable
 {
-    #region Texture
-    protected readonly Texture2D _texture;
-    public Texture2D Texture => _texture;
-    #endregion
-
     #region Collisions
     protected ColliderModel _collider;
     public ColliderModel Collider => _collider;
@@ -19,6 +13,7 @@ public class GameObjectModel : IDisposable
     #region Destroyed
     private bool _isDestroyed;
     public bool IsDestroyed => _isDestroyed;
+
     public event Action<GameObjectModel> DestroyedEvent;
     #endregion
 
@@ -27,16 +22,9 @@ public class GameObjectModel : IDisposable
     public Vector2 Position => _position;
     #endregion
 
-    #region Origin
-    private Vector2 _origin;
-    public Vector2 Origin => _origin;
-    #endregion
-
-    public GameObjectModel(Texture2D texture, Vector2 position)
+    public GameObjectModel(Vector2 position)
     {
-        _texture = texture;
         _position = position;
-        _origin = new Vector2(texture.Width / 2, texture.Height / 2 + 10);
     }
 
     public void Dispose()
@@ -48,16 +36,6 @@ public class GameObjectModel : IDisposable
         DestroyedEvent?.Invoke(this);
 
         DestroyedEvent = null;
-    }
-
-    protected virtual Rectangle GetBounds()
-    {
-        return new Rectangle(
-            (int)(_position.X - _texture.Width  / 3.2),
-            (int)(_position.Y - _texture.Height / 3.2),
-            (int)(_texture.Width / 1.5) ,
-            (int)(_texture.Height / 1.5)
-        );
     }
 }
 

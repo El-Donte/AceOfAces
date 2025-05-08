@@ -8,17 +8,17 @@ namespace AceOfAces.Controllers;
 
 public class EnemyController : IController
 {
-    private readonly EnemyBehaiviourTreeBuilder _builder;
-    private readonly List<Node> _decisionTrees = [];
-    private readonly Random _random = new();
-
     private readonly List<EnemyModel> _enemies;
     private readonly PlayerModel _player;
     private readonly MissileListModel _missiles;
 
-    public EnemyController(List<EnemyModel> models, PlayerModel player, MissileListModel missiles)
+    private readonly EnemyBehaiviourTreeBuilder _builder;
+    private readonly Dictionary<EnemyModel, Node> _decisionTrees = [];
+    private readonly Random _random = new();
+
+    public EnemyController(SpawnerModel spawner, PlayerModel player, MissileListModel missiles)
     {
-        _enemies = models;
+        _enemies = spawner.Enemies;
         _player = player;
         _missiles = missiles;
 
@@ -31,7 +31,7 @@ public class EnemyController : IController
         _builder = new EnemyBehaiviourTreeBuilder(player, updateTargetAction, moveAction, 
                     checkEvasionAction, generateNewTargetAction, fireAction);
 
-        CreateNewBehaiviourTree();
+        spawner.OnEnemySpawedEvent += CreateNewBehaiviourTree;
     }
 
     public void Update(float deltaTime)
@@ -39,18 +39,21 @@ public class EnemyController : IController
         for(int i = 0; i < _enemies.Count; i++)
         {
             var enemy = _enemies[i];
-            _decisionTrees[i].Evaluate(enemy, deltaTime);
+            _decisionTrees[enemy].Evaluate(enemy, deltaTime);
         }
     }
 
-    private void CreateNewBehaiviourTree()
+    private void CreateNewBehaiviourTree(EnemyModel enemy)
     {
-        _decisionTrees.Clear();
-        foreach (var enemy in _enemies)
-        {
-            _missiles.AddCooldown(enemy.Cooldowns);
-            _decisionTrees.Add(_builder.CreateBehaiviourTree());
-        }
+        _missiles.AddCooldowns(enemy.Cooldowns);
+        _decisionTrees.Add(enemy, _builder.CreateBehaiviourTree());
+        enemy.DestroyedEvent += OnEnemyDestroyed;
+    }
+
+    private void OnEnemyDestroyed(GameObjectModel enemy)
+    {
+        _missiles.RemoveCooldowns(((EnemyModel)enemy).Cooldowns);
+        _decisionTrees.Remove((EnemyModel)enemy);
     }
 
     private void UpdateTarget(EnemyModel enemy)

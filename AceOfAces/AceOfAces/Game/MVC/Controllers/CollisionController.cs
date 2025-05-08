@@ -7,10 +7,10 @@ namespace AceOfAces.Controllers;
 
 public class CollisionController : IController
 {
+    private readonly Grid _grid;
+    
     private readonly float collisionCooldownTime = 0.2f;
     private readonly Dictionary<GameObjectModel, float> _collisionCooldowns = [];
-    
-    private readonly Grid _grid;
 
     public CollisionController(Grid grid)
     {
@@ -94,9 +94,8 @@ public class CollisionController : IController
         switch (other)
         {
             case EnemyModel enemy:
-                player.TakeDamage(10);
-                Console.WriteLine(player.Health);
-                //enemy.Dispose();
+                player.TakeDamage(1);
+                enemy.Dispose();
                 break;
 
             case MissileModel missile:

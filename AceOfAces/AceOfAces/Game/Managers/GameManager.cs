@@ -16,7 +16,7 @@ public class GameManager
     private readonly List<IController> _controllers = [];
     
     private readonly SpriteBatch _spriteBatch;
-    private readonly Camera camera;
+    private readonly Camera _camera;
     private readonly Grid _grid;
 
     public static bool IsDebugMode { get; set; } = false;
@@ -26,54 +26,52 @@ public class GameManager
         _spriteBatch = new SpriteBatch(graphics.GraphicsDevice);
 
         _grid = new Grid(64, graphics);
-        camera = new Camera(graphics.GraphicsDevice.Viewport);
+        _camera = new Camera(graphics.GraphicsDevice.Viewport);
+
+        AssetsManager.ContentManager = contentManager;
+        AssetsManager.Graphics = graphics.GraphicsDevice;
+        AssetsManager.LoadContent();
 
         #region Models
         var missles = new MissileListModel();
         var startPos = new Vector2(graphics.GraphicsDevice.Viewport.Width / 2, graphics.GraphicsDevice.Viewport.Height / 2);
 
-        var playerModel = new PlayerModel(contentManager.Load<Texture2D>("jets/jet"), startPos);
-
-        playerModel.PositionChangedEvent += camera.SetPosition;
+        var playerModel = new PlayerModel(startPos);
+        playerModel.PositionChangedEvent += _camera.SetPosition;
         playerModel.PositionChangedEvent += _grid.UpdateGridPosition;
 
-        var enemyModel = new EnemyModel(contentManager.Load<Texture2D>("jets/jet"), startPos + new Vector2(-500, -500));
-        var enemyModel2 = new EnemyModel(contentManager.Load<Texture2D>("jets/jet"), startPos + new Vector2(500, 500));
-        var listEnemies = new List<EnemyModel>() { enemyModel, enemyModel2 };
+        var spawner = new SpawnerModel();
 
         var layers = new List<LayerModel> {
-            new(contentManager.Load<Texture2D>("Clouds/Clouds1"), 0.6f, 0.5f, graphics.GraphicsDevice.Viewport),
-            new(contentManager.Load<Texture2D>("Clouds/Clouds2"), 0.8f, 1f, graphics.GraphicsDevice.Viewport),
-            new(contentManager.Load<Texture2D>("Clouds/Clouds3"), 1.1f, 1.4f, graphics.GraphicsDevice.Viewport)
+            new(AssetsManager.CloudTextures[0], 0.6f, 0.5f, graphics.GraphicsDevice.Viewport),
+            new(AssetsManager.CloudTextures[1], 0.8f, 1f, graphics.GraphicsDevice.Viewport),
+            new(AssetsManager.CloudTextures[2], 1.1f, 1.4f, graphics.GraphicsDevice.Viewport)
         };
         #endregion
 
         #region Controllers
-        _controllers.Add(new PlayerController(playerModel, missles, listEnemies));
-        _controllers.Add(new EnemyController(listEnemies, playerModel, missles));
+        _controllers.Add(new PlayerController(playerModel, missles, spawner));
+        _controllers.Add(new SpawnerController(spawner,graphics));
+        _controllers.Add(new EnemyController(spawner, playerModel, missles));
         _controllers.Add(new MissileController(missles));
         _controllers.Add(new CollisionController(_grid));
-        _controllers.Add(new GridController(_grid, playerModel, missles,listEnemies));
+        _controllers.Add(new GridController(_grid, playerModel, missles, spawner));
         _controllers.Add(new BackGroundController(layers, playerModel));
         #endregion
 
         #region Views
-        var missileCooldownTexture = contentManager.Load<Texture2D>("missileCooldown");
-        var missileTexture = contentManager.Load<Texture2D>("missile");
-        MissileModel.SetTerxture(missileTexture);
-
-        _views.Add(new BackgroundView(layers, playerModel) { SpriteBatch = _spriteBatch });
-        _views.Add(new PlayerView(playerModel, missileTexture) {SpriteBatch = _spriteBatch});
-        _views.Add(new EnemyView(listEnemies, missileTexture) { SpriteBatch = _spriteBatch });
-        _views.Add(new MissilesView(missles) { SpriteBatch = _spriteBatch });
-        _views.Add(new DebugView(graphics, _grid, playerModel, listEnemies, missles) { SpriteBatch = _spriteBatch });
+        _views.Add(new BackgroundView(layers, playerModel, _spriteBatch));
+        _views.Add(new PlayerView(playerModel,_spriteBatch));
+        _views.Add(new EnemyView(spawner, _spriteBatch));
+        _views.Add(new MissilesView(missles,_spriteBatch));
+        _views.Add(new DebugView(_grid, playerModel, spawner, missles, _spriteBatch));
  
         for (int i = 0; i < playerModel.Cooldowns.Count; i++)
         {
             var screenMargin = new Vector2(20 + 60 * i, 50);
 
-            var bar  = new CooldownBarView(missles.Cooldowns[i], missileCooldownTexture, screenMargin)
-            { Camera = camera, GraphicsDevice = graphics.GraphicsDevice, SpriteBatch = _spriteBatch };
+            var bar  = new CooldownBarView(missles.Cooldowns[i], screenMargin, _spriteBatch)
+            { Camera = _camera, GraphicsDevice = graphics.GraphicsDevice };
 
             _views.Add(bar);
         }
@@ -92,7 +90,7 @@ public class GameManager
 
     public void Draw()
     {
-        _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.LinearWrap, null, transformMatrix: camera.TransformMatrix);
+        _spriteBatch.Begin(SpriteSortMode.Deferred, null, SamplerState.LinearWrap, null, transformMatrix: _camera.TransformMatrix);
 
         foreach (var view in _views)
         {

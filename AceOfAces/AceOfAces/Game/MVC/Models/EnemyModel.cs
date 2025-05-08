@@ -1,6 +1,6 @@
-﻿using AceOfAces.Core;
+﻿using AceOfAces.Managers;
+using AceOfAces.Core;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 
@@ -41,10 +41,7 @@ public class EnemyModel : GameObjectModel, ITarget
     public float Acceleration => _acceleration;
 
     private readonly float _minSpeed = 450f;
-    public float MinSpeed => _minSpeed;
-
     private readonly float _maxSpeed = 600f;
-    public float MaxSpeed => _maxSpeed;
 
     private Vector2 _velocity = Vector2.Zero;
     public Vector2 Velocity
@@ -55,6 +52,13 @@ public class EnemyModel : GameObjectModel, ITarget
     #endregion
 
     #region Target
+    private bool _isTargeted = false;
+    public bool IsTargeted
+    {
+        get => _isTargeted;
+        set => _isTargeted = value;
+    }
+
     private readonly float _pursuitRadius = 400f;
     public float PursuitRadius => _pursuitRadius;
 
@@ -65,16 +69,24 @@ public class EnemyModel : GameObjectModel, ITarget
         set => _targetPosition = value;
     }
 
-    public bool IsPursuingPlayer { get; set; }
+    private bool _isPursuingPlayer = false;
+    public bool IsPursuingPlayer
+    {
+        get => _isPursuingPlayer;
+        set => _isPursuingPlayer = value;
+    }
 
     private readonly float _fieldOfViewAngle = MathHelper.ToRadians(60);
     public float FieldOfViewAngle => _fieldOfViewAngle;
+
+    public GameObjectType Type => GameObjectType.Enemy;
     #endregion
 
     #region Missile
-    public List<MissileCooldownModel> Cooldowns { get; } = [];
+    private readonly List<MissileCooldownModel> _cooldowns = [];
+    public List<MissileCooldownModel> Cooldowns => _cooldowns;
 
-    private readonly Vector2 PointLocalOffset = new(0, 30);
+    private readonly Vector2 _pointLocalOffset = new(0, 30);
     public Vector2 MissileJointPosition => GetMissileJointPosition();
 
     public int MaxMissileCount => 2;
@@ -94,99 +106,45 @@ public class EnemyModel : GameObjectModel, ITarget
     }
     #endregion
 
-    public GameObjectType Type => GameObjectType.Enemy;
-
-    public EnemyModel(Texture2D texture, Vector2 position) : base(texture,position)
+    public EnemyModel(Vector2 position) : base(position)
     {
-        _collider = new ColliderModel(GetBounds());
+        _collider = new ColliderModel(AssetsManager.EnemyTexture.Width, AssetsManager.EnemyTexture.Height, 5f);
         for (int i = 0; i < MaxMissileCount; i++)
         {
-            Cooldowns.Add(new MissileCooldownModel(6f));
+            _cooldowns.Add(new MissileCooldownModel(6f));
         }
     }
 
     public void SetPosition(Vector2 position)
     {
         _position += position;
-        _collider.UpdateBounds(GetBounds());
+        _collider.UpdateBounds(_position,_rotation);
     }
 
     public void SetCurrentSpeed(float speed, bool isEvaiding)
     {
-        _currentSpeed = Math.Clamp(_currentSpeed + speed * (isEvaiding ? _evasionKoeff : 1), 
-            _minSpeed, _maxSpeed * (isEvaiding ? _evasionKoeff : 1));
+        var koeff = isEvaiding ? _evasionKoeff : 1;
+        _currentSpeed = Math.Clamp(_currentSpeed + speed * koeff, _minSpeed, _maxSpeed * koeff);
     }
 
     public void TakeDamage(int damage)
     {
         _health -= damage;
+        if (_health <= 0)
+        {
+            Dispose();
+        }
     }
 
     private Vector2 GetMissileJointPosition()
     {
         Vector2 rotatedOffset = new(
-            PointLocalOffset.X * (float)Math.Cos(Rotation) - PointLocalOffset.Y * (float)Math.Sin(Rotation),
-            PointLocalOffset.X * (float)Math.Sin(Rotation) + PointLocalOffset.Y * (float)Math.Cos(Rotation)
+            _pointLocalOffset.X * (float)Math.Cos(_rotation) - _pointLocalOffset.Y * (float)Math.Sin(_rotation),
+            _pointLocalOffset.X * (float)Math.Sin(_rotation) + _pointLocalOffset.Y * (float)Math.Cos(_rotation)
         );
 
-        var offset = FiredMissileCount % 2 == 0 ? -rotatedOffset : rotatedOffset;
+        var offset = _firedMissileCount % 2 == 0 ? -rotatedOffset : rotatedOffset;
         return offset;
-    }
-
-    protected override Rectangle GetBounds()
-    {
-        int width = (int)(_texture.Width / 1.5f);
-        int height = (int)(_texture.Height / 1.5f);
-        Vector2 center = new(
-            _position.X - (_texture.Width / 3.2f) + width / 2,
-            _position.Y - (_texture.Height / 3.2f) + height / 2
-        );
-
-        if (_rotation == 0)
-        {
-            return new Rectangle(
-                (int)(center.X - width / 2),
-                (int)(center.Y - height / 2),
-                width,
-                height
-            );
-        }
-
-        float cos = MathF.Cos(_rotation + MathHelper.PiOver2);
-        float sin = MathF.Sin(_rotation + MathHelper.PiOver2);
-
-        Vector2[] corners = 
-        [
-            new (-width / 2, -height / 2),
-            new (width / 2, -height / 2),
-            new (width / 2, height / 2),
-            new (-width / 2, height / 2)
-        ];
-
-        float minX = float.MaxValue;
-        float maxX = float.MinValue;
-        float minY = float.MaxValue;
-        float maxY = float.MinValue;
-
-        foreach (Vector2 corner in corners)
-        {
-            Vector2 rotated = new Vector2(
-                corner.X * cos - corner.Y * sin,
-                corner.X * sin + corner.Y * cos
-            ) + center;
-
-            minX = Math.Min(minX, rotated.X);
-            maxX = Math.Max(maxX, rotated.X);
-            minY = Math.Min(minY, rotated.Y);
-            maxY = Math.Max(maxY, rotated.Y);
-        }
-
-        return new Rectangle(
-            (int)minX,
-            (int)minY,
-            (int)(maxX - minX),
-            (int)(maxY - minY)
-        );
     }
 }
 

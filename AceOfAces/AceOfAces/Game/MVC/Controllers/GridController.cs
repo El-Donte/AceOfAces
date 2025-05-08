@@ -6,17 +6,18 @@ namespace AceOfAces.Controllers;
 
 public class GridController : IController
 {
-    private readonly Grid _grid;
     private readonly PlayerModel _player;
     private readonly List<EnemyModel> _enemies;
     private readonly MissileListModel _missileList;
 
-    public GridController(Grid grid, PlayerModel player, MissileListModel missiles, List<EnemyModel> enemies) 
+    private readonly Grid _grid;
+
+    public GridController(Grid grid, PlayerModel player, MissileListModel missiles,SpawnerModel spawner) 
     { 
         _grid = grid;
         _player = player;
         _missileList = missiles;
-        _enemies = enemies;
+        _enemies = spawner.Enemies;
     }
 
     public void Update(float deltaTime)

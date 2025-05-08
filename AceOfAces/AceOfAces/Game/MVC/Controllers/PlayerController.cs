@@ -10,17 +10,17 @@ namespace AceOfAces.Controllers;
 public class PlayerController : IController
 {
     private readonly MissileListModel _missiles;
-    private readonly List<EnemyModel> _enemy;
+    private readonly List<EnemyModel> _enemies;
     private readonly PlayerModel _player;
 
     private Vector2 _inputDirection;
 
-    public PlayerController(PlayerModel playerModel,MissileListModel missileList, List<EnemyModel> enemyModel)
+    public PlayerController(PlayerModel playerModel,MissileListModel missileList, SpawnerModel spawner)
     {
         _player = playerModel;
         _missiles = missileList;
-        _enemy = enemyModel;
-        _missiles.AddCooldown(_player.Cooldowns);
+        _enemies = spawner.Enemies;
+        _missiles.AddCooldowns(_player.Cooldowns);
 
         _player.DestroyedEvent += OnPlayerDestroyed;
         _player.OnDamagedEvent += StartBlinkingEffect;
@@ -32,6 +32,7 @@ public class PlayerController : IController
         UpdateMovement(deltaTime);
         UpdateBlinking();
         UpdateInvurTimer(deltaTime);
+        ChangeTarget();
         Fire();
     }
 
@@ -61,12 +62,35 @@ public class PlayerController : IController
 
     private void Fire()
     {
+        if (_enemies.Count == 0 || _player.TargetIndex >= _enemies.Count)
+        {
+            return;
+        }
+
+        var target = _enemies[_player.TargetIndex];
         if (InputManager.IsKeyPressed(Keys.Space) && 
             (_player.Cooldowns[0].AvailableToFire || 
              _player.Cooldowns[1].AvailableToFire))
         {
-            _missiles.CreateMissile(_player.Position + _player.MissileJointPosition,_player , _enemy[0]);
+            _missiles.CreateMissile(_player.Position + _player.MissileJointPosition,_player , target);
             _player.FiredMissileCount++;
+        }
+    }
+
+    private void ChangeTarget()
+    {
+        if (_enemies.Count == 0 || _player.TargetIndex >= _enemies.Count)
+        {
+            return;
+        }
+
+        if (InputManager.IsKeyPressed(Keys.E))
+        {
+            _enemies[_player.TargetIndex].IsTargeted = false;
+
+            _player.TargetIndex = (_player.TargetIndex + 1) % _enemies.Count;
+
+            _enemies[_player.TargetIndex].IsTargeted = true;
         }
     }
 

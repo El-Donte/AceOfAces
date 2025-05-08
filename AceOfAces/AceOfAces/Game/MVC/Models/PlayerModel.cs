@@ -1,4 +1,5 @@
 ﻿using AceOfAces.Core;
+using AceOfAces.Managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -9,10 +10,10 @@ namespace AceOfAces.Models;
 public class PlayerModel : GameObjectModel, ITarget
 {
     #region Health
-    public event Action<bool> OnDamagedEvent;
-
     private int _health = 4;
     public int Health => _health; // Здоровье
+
+    public event Action<bool> OnDamagedEvent;
     #endregion
 
     #region Rotation
@@ -44,17 +45,14 @@ public class PlayerModel : GameObjectModel, ITarget
         set => _velocity = value;
     }
 
-    private readonly float _minSpeed = 100f;
-    public float MinSpeed => _minSpeed;
-
-    private readonly float _maxSpeed = 300f;
-    public float MaxSpeed => _maxSpeed;
-
     private readonly float _acceleration = 200f;
     public float Acceleration => _acceleration;
 
     private readonly float _decceleration = 150f;
     public float Decceleration => _decceleration;
+
+    private readonly float _minSpeed = 100f;
+    private readonly float _maxSpeed = 300f;
     #endregion
 
     #region Invulnerability
@@ -73,8 +71,6 @@ public class PlayerModel : GameObjectModel, ITarget
     #endregion
 
     #region Blink
-    public event Action<float> OnBlinkPhaseChangedEvent;
-
     private float _blinkPhase = 0f;
 
     public float BlinkPhase
@@ -86,18 +82,26 @@ public class PlayerModel : GameObjectModel, ITarget
             OnBlinkPhaseChangedEvent?.Invoke(_blinkPhase);
         }
     }
+
+    public event Action<float> OnBlinkPhaseChangedEvent;
     #endregion
 
     #region Missile
-    private readonly Vector2 PointLocalOffset = new(30, 0);
+    private int _targetIndex;
+    public int TargetIndex
+    {
+        get => _targetIndex;
+        set => _targetIndex = value;
+    } 
 
-    public int MaxMissileCount => 2;
-
+    private readonly Vector2 _pointLocalOffset = new(30, 0);
     public Vector2 MissileJointPosition => GetMissileJointPosition();
 
     public List<MissileCooldownModel> Cooldowns { get; } = [];
 
     public GameObjectType Type => GameObjectType.Player;
+
+    public int MaxMissileCount => 2;
 
     private int _firedMissileCount;
     public int FiredMissileCount
@@ -116,9 +120,9 @@ public class PlayerModel : GameObjectModel, ITarget
 
     public event Action<Vector2> PositionChangedEvent;
 
-    public PlayerModel(Texture2D texture, Vector2 position) : base(texture, position)
+    public PlayerModel(Vector2 position) : base(position)
     {
-        _collider = new ColliderModel(GetBounds());
+        _collider = new ColliderModel(AssetsManager.PlayerTexture.Width, AssetsManager.PlayerTexture.Height, 5f);
 
         for (int i = 0; i < MaxMissileCount; i++)
         {
@@ -129,7 +133,7 @@ public class PlayerModel : GameObjectModel, ITarget
     public void SetPosition(Vector2 position)
     {
         _position += position;
-        _collider.UpdateBounds(GetBounds());
+        _collider.UpdateBounds(_position, _rotation);
         PositionChangedEvent?.Invoke(_position);
     }
 
@@ -150,70 +154,12 @@ public class PlayerModel : GameObjectModel, ITarget
     private Vector2 GetMissileJointPosition()
     {
         Vector2 rotatedOffset = new(
-            PointLocalOffset.X * (float)Math.Cos(Rotation) - PointLocalOffset.Y * (float)Math.Sin(Rotation),
-            PointLocalOffset.X * (float)Math.Sin(Rotation) + PointLocalOffset.Y * (float)Math.Cos(Rotation)
+            _pointLocalOffset.X * (float)Math.Cos(_rotation) - _pointLocalOffset.Y * (float)Math.Sin(_rotation),
+            _pointLocalOffset.X * (float)Math.Sin(_rotation) + _pointLocalOffset.Y * (float)Math.Cos(_rotation)
         );
 
-        var offset = FiredMissileCount % 2 == 0 ? -rotatedOffset : rotatedOffset;
+        var offset = _firedMissileCount % 2 == 0 ? -rotatedOffset : rotatedOffset;
         return offset;
-    }
-
-    protected override Rectangle GetBounds()
-    {
-        // Получаем исходные размеры и позицию
-        int width = (int)(_texture.Width / 1.5f);
-        int height = (int)(_texture.Height / 1.5f);
-        Vector2 center = new(
-            _position.X - (_texture.Width / 3.2f) + width / 2,
-            _position.Y - (_texture.Height / 3.2f) + height / 2
-        );
-
-        // Если угол поворота равен нулю, возвращаем обычный прямоугольник
-        if (_rotation == 0)
-            return new Rectangle(
-                (int)(center.X - width / 2),
-                (int)(center.Y - height / 2),
-                width,
-                height
-            );
-
-        // Вычисляем повёрнутые углы прямоугольника
-        float cos = MathF.Cos(_rotation);
-        float sin = MathF.Sin(_rotation);
-
-        Vector2[] corners = [
-             new (-width / 2, -height / 2),
-            new (width / 2, -height / 2),
-            new (width / 2, height / 2),
-            new (-width / 2, height / 2),
-        ];
-
-        // Поворачиваем углы и находим границы
-        float minX = float.MaxValue;
-        float maxX = float.MinValue;
-        float minY = float.MaxValue;
-        float maxY = float.MinValue;
-
-        foreach (Vector2 corner in corners)
-        {
-            Vector2 rotated = new Vector2(
-                corner.X * cos - corner.Y * sin,
-                corner.X * sin + corner.Y * cos
-            ) + center;
-
-            minX = Math.Min(minX, rotated.X);
-            maxX = Math.Max(maxX, rotated.X);
-            minY = Math.Min(minY, rotated.Y);
-            maxY = Math.Max(maxY, rotated.Y);
-        }
-
-        // Создаём новый прямоугольник, содержащий повёрнутый коллайдер
-        return new Rectangle(
-            (int)minX,
-            (int)minY,
-            (int)(maxX - minX),
-            (int)(maxY - minY)
-        );
     }
 }
 

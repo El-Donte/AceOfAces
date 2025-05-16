@@ -31,7 +31,7 @@ public class EnemyController : IController
         _builder = new EnemyBehaiviourTreeBuilder(player, updateTargetAction, moveAction, 
                     checkEvasionAction, generateNewTargetAction, fireAction);
 
-        spawner.OnEnemySpawedEvent += CreateNewBehaiviourTree;
+        spawner.OnEnemySpawnedEvent += CreateNewBehaiviourTree;
     }
 
     public void Update(float deltaTime)
@@ -39,6 +39,7 @@ public class EnemyController : IController
         for(int i = 0; i < _enemies.Count; i++)
         {
             var enemy = _enemies[i];
+            enemy.FireDelayTimer -= deltaTime;
             _decisionTrees[enemy].Evaluate(enemy, deltaTime);
         }
     }
@@ -52,6 +53,7 @@ public class EnemyController : IController
 
     private void OnEnemyDestroyed(GameObjectModel enemy)
     {
+        ((EnemyModel)enemy).IsTargeted = false;
         _missiles.RemoveCooldowns(((EnemyModel)enemy).Cooldowns);
         _decisionTrees.Remove((EnemyModel)enemy);
     }
@@ -125,13 +127,13 @@ public class EnemyController : IController
     {
         if (!IsPlayerInFieldOfView(enemy)) return;
 
-        if (enemy.Cooldowns[0].AvailableToFire ||
-             enemy.Cooldowns[1].AvailableToFire)
+        if (enemy.CanFire && (enemy.Cooldowns[0].AvailableToFire ||
+             enemy.Cooldowns[1].AvailableToFire))
         {
             _missiles.CreateMissile(enemy.Position + enemy.MissileJointPosition, enemy, _player);
-            enemy.FiredMissileCount++;        
+            enemy.FiredMissileCount++;
+            enemy.FireDelayTimer = 2f;
         }
-
     }
 
     private bool IsPlayerInFieldOfView(EnemyModel enemy)

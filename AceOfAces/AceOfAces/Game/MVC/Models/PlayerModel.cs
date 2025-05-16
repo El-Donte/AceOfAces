@@ -87,7 +87,7 @@ public class PlayerModel : GameObjectModel, ITarget
     #endregion
 
     #region Missile
-    private int _targetIndex;
+    private int _targetIndex = 0;
     public int TargetIndex
     {
         get => _targetIndex;
@@ -101,7 +101,8 @@ public class PlayerModel : GameObjectModel, ITarget
 
     public GameObjectType Type => GameObjectType.Player;
 
-    public int MaxMissileCount => 2;
+    private readonly int _maxMissileCount = 2;
+    public int MaxMissileCount => _maxMissileCount;
 
     private int _firedMissileCount;
     public int FiredMissileCount
@@ -109,7 +110,7 @@ public class PlayerModel : GameObjectModel, ITarget
         get => _firedMissileCount;
         set
         {
-            if(_firedMissileCount == MaxMissileCount)
+            if(_firedMissileCount == _maxMissileCount)
             {
                 _firedMissileCount = 0;
             }
@@ -122,7 +123,7 @@ public class PlayerModel : GameObjectModel, ITarget
 
     public PlayerModel(Vector2 position) : base(position)
     {
-        _collider = new ColliderModel(AssetsManager.PlayerTexture.Width, AssetsManager.PlayerTexture.Height, 5f);
+        _collider = new ColliderModel(AssetsManager.PlayerTexture.Width, AssetsManager.PlayerTexture.Height, 5f, 0.5f);
 
         for (int i = 0; i < MaxMissileCount; i++)
         {

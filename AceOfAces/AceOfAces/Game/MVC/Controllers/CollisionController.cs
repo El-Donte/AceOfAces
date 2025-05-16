@@ -95,7 +95,7 @@ public class CollisionController : IController
         {
             case EnemyModel enemy:
                 player.TakeDamage(1);
-                enemy.Dispose();
+                enemy.TakeDamage(2);
                 break;
 
             case MissileModel missile:

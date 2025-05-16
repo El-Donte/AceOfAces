@@ -61,7 +61,7 @@ public class SpawnerModel
         set => _maxEnemies = value;
     }
 
-    public Action<EnemyModel> OnEnemySpawedEvent { get; set; }
+    public Action<EnemyModel> OnEnemySpawnedEvent { get; set; }
 
     public SpawnerModel() { }
 
@@ -70,7 +70,7 @@ public class SpawnerModel
         var enemy = new EnemyModel(position);
         enemy.DestroyedEvent += OnEnemyDestroyed;
         _enemies.Add(enemy);
-        OnEnemySpawedEvent?.Invoke(enemy);
+        OnEnemySpawnedEvent?.Invoke(enemy);
     }
 
     private void OnEnemyDestroyed(GameObjectModel enemy)

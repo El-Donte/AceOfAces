@@ -104,11 +104,27 @@ public class EnemyModel : GameObjectModel, ITarget
             }
         }
     }
+
+    private float _fireDelay = 2f;
+    public float FireDelayTimer
+    {
+        get => _fireDelay;
+        set
+        {
+            if(_fireDelay <= 0)
+            {
+                _fireDelay = 0;
+            }
+            _fireDelay = value;
+        }
+    }
+
+    public bool CanFire => _fireDelay <= 0;
     #endregion
 
     public EnemyModel(Vector2 position) : base(position)
     {
-        _collider = new ColliderModel(AssetsManager.EnemyTexture.Width, AssetsManager.EnemyTexture.Height, 5f);
+        _collider = new ColliderModel(AssetsManager.EnemyTexture.Height, AssetsManager.EnemyTexture.Width, 5f, 0.8f);
         for (int i = 0; i < MaxMissileCount; i++)
         {
             _cooldowns.Add(new MissileCooldownModel(6f));
@@ -132,6 +148,7 @@ public class EnemyModel : GameObjectModel, ITarget
         _health -= damage;
         if (_health <= 0)
         {
+            IsTargeted = false;
             Dispose();
         }
     }

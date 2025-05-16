@@ -1,4 +1,5 @@
-﻿using AceOfAces.Managers;
+﻿using AceOfAces.Core;
+using AceOfAces.Managers;
 using AceOfAces.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -74,6 +75,8 @@ public class PlayerController : IController
         {
             _missiles.CreateMissile(_player.Position + _player.MissileJointPosition,_player , target);
             _player.FiredMissileCount++;
+
+            GameEvents.TriggerBulletTrail(_player.Position);
         }
     }
 

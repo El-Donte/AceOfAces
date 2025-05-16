@@ -82,7 +82,7 @@ public class MissileModel : GameObjectModel
 
     public MissileModel(Vector2 position) : base(position)
     {
-        _collider = new ColliderModel(AssetsManager.MissileTexture.Width, AssetsManager.MissileTexture.Height, 2f);
+        _collider = new ColliderModel(AssetsManager.MissileTexture.Height, AssetsManager.MissileTexture.Width, 4f, 0.8f);
     }
 
     public void SetPosition(Vector2 position)

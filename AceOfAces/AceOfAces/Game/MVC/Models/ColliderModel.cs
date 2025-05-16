@@ -8,15 +8,17 @@ public class ColliderModel
     private readonly int _width;
     private readonly int _height;
     private readonly float _koeff;
+    private readonly float _scale;
 
     private Rectangle _bounds;
     public Rectangle Bounds => _bounds;
 
-    public ColliderModel(int width, int height, float koeff)
+    public ColliderModel(int width, int height, float koeff, float scale = 1.0f)
     {
         _width = width;
         _height = height;
         _koeff = koeff;
+        _scale = Math.Clamp(scale, 0.1f, 2.0f);
     }
 
     public void UpdateBounds(Vector2 position, float rotation)
@@ -26,13 +28,16 @@ public class ColliderModel
             position.Y - (_height / _koeff) + _height / 5
         );
 
+        float scaledWidth = _width * _scale;
+        float scaledHeight = _height * _scale;
+
         if (rotation == 0)
         {
             _bounds = new Rectangle(
-                (int)(center.X - _width / 2),
-                (int)(center.Y - _height / 2),
-                _width,
-                _height
+                (int)(center.X - scaledWidth / 2),
+                (int)(center.Y - scaledHeight / 2),
+                (int)scaledWidth,
+                (int)scaledHeight
             );
             return;
         }
@@ -41,10 +46,10 @@ public class ColliderModel
         float sin = MathF.Sin(rotation);
 
         Vector2[] corners = [
-            new (-_width / 2, -_height / 2),
-            new (_width / 2, -_height / 2),
-            new (_width / 2, _height / 2),
-            new (-_width / 2, _height / 2),
+            new (-scaledWidth / 2, -scaledHeight / 2),
+            new (scaledWidth / 2, -scaledHeight / 2),
+            new (scaledWidth / 2, scaledHeight / 2),
+            new (-scaledWidth / 2, scaledHeight / 2),
         ];
 
         float minX = float.MaxValue;

@@ -1,5 +1,6 @@
 ﻿using AceOfAces.Controllers;
 using AceOfAces.Core;
+using AceOfAces.Core.Particles;
 using AceOfAces.Models;
 using AceOfAces.Views;
 using Microsoft.Xna.Framework;
@@ -31,6 +32,8 @@ public class GameManager
         AssetsManager.ContentManager = contentManager;
         AssetsManager.Graphics = graphics.GraphicsDevice;
         AssetsManager.LoadContent();
+        ParticleEmitter particleEmitter = new ParticleEmitter();
+        
 
         #region Models
         var missles = new MissileListModel();
@@ -50,6 +53,7 @@ public class GameManager
         #endregion
 
         #region Controllers
+        _controllers.Add(new ParticleContorller());
         _controllers.Add(new PlayerController(playerModel, missles, spawner));
         _controllers.Add(new SpawnerController(spawner,graphics));
         _controllers.Add(new EnemyController(spawner, playerModel, missles));
@@ -61,6 +65,7 @@ public class GameManager
 
         #region Views
         _views.Add(new BackgroundView(layers, playerModel, _spriteBatch));
+        _views.Add(new ParticleView(_spriteBatch));
         _views.Add(new PlayerView(playerModel,_spriteBatch));
         _views.Add(new EnemyView(spawner, _spriteBatch));
         _views.Add(new MissilesView(missles,_spriteBatch));
@@ -80,11 +85,11 @@ public class GameManager
 
     public void Update(GameTime gt)
     {
-        float gameTime = (float)gt.ElapsedGameTime.TotalSeconds;
+        float deltaTime = (float)gt.ElapsedGameTime.TotalSeconds;
 
         foreach (var controller in _controllers)
         {
-            controller.Update(gameTime);
+            controller.Update(deltaTime);
         }
     }
 

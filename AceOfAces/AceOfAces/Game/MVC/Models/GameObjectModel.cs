@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using AceOfAces.Core;
+using Microsoft.Xna.Framework;
 using System;
 
 namespace AceOfAces.Models;
@@ -32,6 +33,8 @@ public class GameObjectModel : IDisposable
         if (IsDestroyed) return;
 
         _isDestroyed = true;
+
+        GameEvents.TriggerExplosion(_position);
 
         DestroyedEvent?.Invoke(this);
 

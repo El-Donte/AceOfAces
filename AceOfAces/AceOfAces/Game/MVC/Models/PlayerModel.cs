@@ -1,7 +1,6 @@
 ﻿using AceOfAces.Core;
 using AceOfAces.Managers;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 
@@ -11,7 +10,19 @@ public class PlayerModel : GameObjectModel, ITarget
 {
     #region Health
     private int _health = 4;
-    public int Health => _health; // Здоровье
+    public int Health
+    {
+        get => _health;
+        set
+        {
+            _health = value;
+            Console.WriteLine(_health);
+            if (_health <= 0)
+            {
+                GameEvents.TriggerGameOver();
+            }
+        }
+    }
 
     public event Action<bool> OnDamagedEvent;
     #endregion
@@ -145,7 +156,7 @@ public class PlayerModel : GameObjectModel, ITarget
             return;
         }
 
-        _health -= damage;
+        Health -= damage;
 
         _invulnerabilityTimer = 1.5f;
 

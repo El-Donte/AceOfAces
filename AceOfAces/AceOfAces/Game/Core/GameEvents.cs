@@ -2,21 +2,27 @@
 using System;
 
 
-namespace AceOfAces.Core
+namespace AceOfAces.Core;
+
+public static class GameEvents
 {
-    public static class GameEvents
+    public static event Action<Vector2> OnExplosionEvent;
+    public static event Action<Vector2> OnBulletTrailEvent;
+    public static event Action OnGameOverEvent;
+
+    public static void TriggerExplosion(Vector2 position)
     {
-        public static event Action<Vector2> OnExplosion;
-        public static event Action<Vector2> OnBulletTrail;
+        OnExplosionEvent?.Invoke(position);
+    }
 
-        public static void TriggerExplosion(Vector2 position)
-        {
-            OnExplosion?.Invoke(position);
-        }
+    public static void TriggerBulletTrail(Vector2 position)
+    {
+        OnBulletTrailEvent?.Invoke(position);
+    }
 
-        public static void TriggerBulletTrail(Vector2 position)
-        {
-            OnBulletTrail?.Invoke(position);
-        }
+    public static void TriggerGameOver()
+    {
+        OnGameOverEvent?.Invoke();
     }
 }
+

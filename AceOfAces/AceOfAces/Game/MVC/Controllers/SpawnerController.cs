@@ -1,5 +1,6 @@
 ﻿using AceOfAces.Models;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 
 namespace AceOfAces.Controllers;
@@ -7,10 +8,10 @@ namespace AceOfAces.Controllers;
 public class SpawnerController : IController
 {
     private readonly SpawnerModel _spawner;
-    private readonly GraphicsDeviceManager _graphics;
+    private readonly GraphicsDevice _graphics;
     private readonly Random _random = new Random();        
 
-    public SpawnerController(SpawnerModel spawner, GraphicsDeviceManager graphics) 
+    public SpawnerController(SpawnerModel spawner, GraphicsDevice graphics) 
     { 
         _spawner = spawner;
         _graphics = graphics;
@@ -18,8 +19,8 @@ public class SpawnerController : IController
 
     private Vector2 GenerateSpawnPosition()
     {
-        int screenWidth = _graphics.GraphicsDevice.Viewport.Width;
-        int screenHeight = _graphics.GraphicsDevice.Viewport.Height;
+        int screenWidth = _graphics.Viewport.Width;
+        int screenHeight = _graphics.Viewport.Height;
         int side = _random.Next(0, 4);
 
         float x = 0;

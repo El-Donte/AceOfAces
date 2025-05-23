@@ -1,5 +1,6 @@
 ﻿using AceOfAces.Models;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 
@@ -7,7 +8,7 @@ namespace AceOfAces.Core;
 
 public class Grid
 {
-    private readonly GraphicsDeviceManager _graphics;
+    private readonly GraphicsDevice _graphics;
     private readonly GameObjectModel[,] _cells;
     private Rectangle _gridBounds;
 
@@ -26,13 +27,13 @@ public class Grid
     private readonly HashSet<GameObjectModel> _activeObjects = [];
     public HashSet<GameObjectModel> ActiveObjects => _activeObjects;
 
-    public Grid(int cellSize, GraphicsDeviceManager graphics )
+    public Grid(int cellSize, GraphicsDevice graphics )
     {
         _cellSize = cellSize;
         _graphics = graphics;
 
-        _width = (int)Math.Ceiling((float)_graphics.GraphicsDevice.Viewport.Width / cellSize) + 2;
-        _height =(int)Math.Ceiling((float)_graphics.GraphicsDevice.Viewport.Height / cellSize) + 2;
+        _width = (int)Math.Ceiling((float)_graphics.Viewport.Width / cellSize) + 2;
+        _height =(int)Math.Ceiling((float)_graphics.Viewport.Height / cellSize) + 2;
 
         _cells = new GameObjectModel[_width, _height];
         _gridBounds = new Rectangle(0, 0, _width * _cellSize, _height * _cellSize);

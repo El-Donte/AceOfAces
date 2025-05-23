@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using AceOfAces.Core.FSM;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace AceOfAces.Managers;
@@ -24,7 +25,7 @@ public static class InputManager
 
         if (IsKeyPressed(Keys.OemComma))
         {
-            GameManager.IsDebugMode = !GameManager.IsDebugMode;
+            GameState.IsDebugMode = !GameState.IsDebugMode;
         }
 
         if (_inputDirection != Vector2.Zero)

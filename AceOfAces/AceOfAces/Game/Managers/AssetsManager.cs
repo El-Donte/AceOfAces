@@ -17,6 +17,10 @@ public static class AssetsManager
     public static Texture2D CooldownTexture { get; private set; }
     public static Texture2D PixelTexture { get; private set; }
     public static Texture2D ParticleTexture { get; private set; }
+    public static SpriteFont Font { get; private set; }
+    public static Texture2D ButtonTexture { get; private set; }
+
+    public static void Initialize(ContentManager contentManager, GraphicsDevice graphicsDevice) => (ContentManager, Graphics) = (contentManager, graphicsDevice);
 
     public static void LoadContent()
     {
@@ -36,6 +40,10 @@ public static class AssetsManager
         PixelTexture.SetData([Color.White]);
 
         ParticleTexture = ContentManager.Load<Texture2D>("particle");
+
+        Font = ContentManager.Load<SpriteFont>("Fonts/font");
+
+        ButtonTexture = ContentManager.Load<Texture2D>("button");
     }
 }
 

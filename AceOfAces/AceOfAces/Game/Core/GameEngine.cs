@@ -1,4 +1,5 @@
-﻿using AceOfAces.Managers;
+﻿using AceOfAces.Core.FSM;
+using AceOfAces.Managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -8,7 +9,6 @@ namespace AceOfAces.Core;
 public class GameEngine : Game
 {
     private readonly GraphicsDeviceManager _graphics;
-    private GameManager _gameManager;
 
     public GameEngine()
     {
@@ -23,7 +23,21 @@ public class GameEngine : Game
         _graphics.PreferredBackBufferHeight = 1080; //764;
         _graphics.ApplyChanges();
 
-        _gameManager = new GameManager(_graphics,Content);
+        AssetsManager.Initialize(Content, _graphics.GraphicsDevice);
+        AssetsManager.LoadContent();
+
+
+        var stateComponent = new StateComponent(this);
+        var gameState = new GameState(stateComponent.StateMachine);
+        var gameOverState = new GameOverState(stateComponent.StateMachine);
+        var menuState = new MenuState(stateComponent.StateMachine);
+
+        stateComponent.StateMachine.Add("Menu", menuState);
+        stateComponent.StateMachine.Add("Game", gameState);
+        stateComponent.StateMachine.Add("GameOver", gameOverState);
+
+        stateComponent.StateMachine.Change("Menu");
+        Components.Add(stateComponent);
 
         base.Initialize();
     }
@@ -35,16 +49,12 @@ public class GameEngine : Game
             Exit();
         }
 
-        _gameManager.Update(gameTime);
-
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
-
-        _gameManager.Draw();
 
         base.Draw(gameTime);
     }

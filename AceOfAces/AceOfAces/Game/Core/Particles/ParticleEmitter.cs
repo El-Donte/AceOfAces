@@ -48,8 +48,8 @@ public class ParticleEmitter
 
     public ParticleEmitter()
     {
-        GameEvents.OnExplosion += (position) => Emit(ParticleType.Explosion, position);
-        GameEvents.OnBulletTrail += (position) => Emit(ParticleType.BulletTrail, position);
+        GameEvents.OnExplosionEvent += (position) => Emit(ParticleType.Explosion, position);
+        GameEvents.OnBulletTrailEvent += (position) => Emit(ParticleType.BulletTrail, position);
     }
 
     private void Emit(ParticleType type, Vector2 position)

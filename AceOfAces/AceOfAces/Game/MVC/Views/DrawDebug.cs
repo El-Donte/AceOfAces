@@ -1,4 +1,5 @@
-﻿using AceOfAces.Core;
+﻿using AceOfAces.Core.FSM;
+using AceOfAces.Core;
 using AceOfAces.Managers;
 using AceOfAces.Models;
 using Microsoft.Xna.Framework;
@@ -29,7 +30,7 @@ public class DebugView : IView
 
     public void Draw()
     {
-        if (GameManager.IsDebugMode == false) return;
+        if (GameState.IsDebugMode == false) return;
 
         DrawGrid();
 

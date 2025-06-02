@@ -19,6 +19,9 @@ public static class AssetsManager
     public static Texture2D ParticleTexture { get; private set; }
     public static SpriteFont Font { get; private set; }
     public static Texture2D ButtonTexture { get; private set; }
+    public static Texture2D MenuTexture { get; private set; }
+
+    public static Texture2D GameOverTexture { get; private set; }
 
     public static void Initialize(ContentManager contentManager, GraphicsDevice graphicsDevice) => (ContentManager, Graphics) = (contentManager, graphicsDevice);
 
@@ -43,7 +46,11 @@ public static class AssetsManager
 
         Font = ContentManager.Load<SpriteFont>("Fonts/font");
 
-        ButtonTexture = ContentManager.Load<Texture2D>("button");
+        //ButtonTexture = ContentManager.Load<Texture2D>("button");
+
+        MenuTexture = ContentManager.Load<Texture2D>("Menu");
+
+        GameOverTexture = ContentManager.Load<Texture2D>("GameOver");
     }
 }
 

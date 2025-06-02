@@ -9,20 +9,20 @@ public class MenuView : IView
 {
     private readonly MenuModel _model;
     private readonly SpriteBatch _spriteBatch;
-    private readonly SpriteFont _font;
+    private readonly Texture2D menuTexture;
 
     public MenuView(MenuModel model, SpriteBatch spriteBatch)
     {
         _model = model;
         _spriteBatch = spriteBatch;
-        _font = AssetsManager.Font;
+        menuTexture = AssetsManager.MenuTexture;
     }
 
     public void Draw()
     {
+        _spriteBatch.Draw(menuTexture, new Vector2(0, 0), Color.White);
         _model.QuitButton.Draw(_spriteBatch);
         _model.PlayButton.Draw(_spriteBatch);
-        _spriteBatch.DrawString(_font, "Ace Of Aces", new Vector2(100, 100), Color.White);
     }
 }
 

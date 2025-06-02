@@ -18,19 +18,16 @@ public class GameState : BaseState
     private readonly SpriteBatch _spriteBatch;
     private readonly Camera _camera;
     private readonly Grid _grid;
-    private readonly StateMachine _stateMachine;
-    private PlayerModel _playerModel;
 
     public static bool IsDebugMode { get; set; } = false;
 
     public GameState(StateMachine stateMachine)
         : base(stateMachine)
     {
-        var graphics = stateMachine.GameEngine.GraphicsDevice;
+        var graphics = StateMachine.GameEngine.GraphicsDevice;
         _spriteBatch = new SpriteBatch(graphics);
         _grid = new Grid(64, graphics);
         _camera = new Camera(graphics.Viewport);
-        _stateMachine = stateMachine;
     }
 
     public override void Update(float deltaTime)
@@ -57,19 +54,20 @@ public class GameState : BaseState
 
     public override void Enter(params object[] args)
     {
-        var graphics = _stateMachine.GameEngine.GraphicsDevice;
+        var graphics = StateMachine.GameEngine.GraphicsDevice;
 
         ParticleEmitter particleEmitter = new ParticleEmitter();
         
         GameEvents.OnGameOverEvent += OnGameOver;
 
         #region Models
+
         var missles = new MissileListModel();
         var startPos = new Vector2(graphics.Viewport.Width / 2, graphics.Viewport.Height / 2);
 
-        _playerModel = new PlayerModel(startPos);
-        _playerModel.PositionChangedEvent += _camera.SetPosition;
-        _playerModel.PositionChangedEvent += _grid.UpdateGridPosition;
+        var playerModel = new PlayerModel(startPos);
+        playerModel.PositionChangedEvent += _camera.SetPosition;
+        playerModel.PositionChangedEvent += _grid.UpdateGridPosition;
 
         var spawner = new SpawnerModel();
 
@@ -82,24 +80,24 @@ public class GameState : BaseState
 
         #region Controllers
         _controllers.Add(new ParticleContorller());
-        _controllers.Add(new PlayerController(_playerModel, missles, spawner));
+        _controllers.Add(new PlayerController(playerModel, missles, spawner));
         _controllers.Add(new SpawnerController(spawner, graphics));
-        _controllers.Add(new EnemyController(spawner, _playerModel, missles));
+        _controllers.Add(new EnemyController(spawner, playerModel, missles));
         _controllers.Add(new MissileController(missles));
         _controllers.Add(new CollisionController(_grid));
-        _controllers.Add(new GridController(_grid, _playerModel, missles, spawner));
-        _controllers.Add(new BackGroundController(layers, _playerModel));
+        _controllers.Add(new GridController(_grid, playerModel, missles, spawner));
+        _controllers.Add(new BackGroundController(layers, playerModel));
         #endregion
 
         #region Views
-        _views.Add(new BackgroundView(layers, _playerModel, _spriteBatch));
+        _views.Add(new BackgroundView(layers, playerModel, _spriteBatch));
         _views.Add(new ParticleView(_spriteBatch));
-        _views.Add(new PlayerView(_playerModel, _spriteBatch));
+        _views.Add(new PlayerView(playerModel, _spriteBatch));
         _views.Add(new EnemyView(spawner, _spriteBatch));
         _views.Add(new MissilesView(missles, _spriteBatch));
-        _views.Add(new DebugView(_grid, _playerModel, spawner, missles, _spriteBatch));
+        _views.Add(new DebugView(_grid, playerModel, spawner, missles, _spriteBatch));
 
-        for (int i = 0; i < _playerModel.Cooldowns.Count; i++)
+        for (int i = 0; i < playerModel.Cooldowns.Count; i++)
         {
             var screenMargin = new Vector2(20 + 60 * i, 50);
 
@@ -113,12 +111,10 @@ public class GameState : BaseState
 
     public override void Exit()
     {
-        _playerModel.Dispose();
         _views.Clear();
         _controllers.Clear();
         GameEvents.OnGameOverEvent -= OnGameOver;
     }
 
-    private void OnGameOver() => _stateMachine.Change("GameOver");
+    private void OnGameOver() => StateMachine.Change("GameOver");
 }
-

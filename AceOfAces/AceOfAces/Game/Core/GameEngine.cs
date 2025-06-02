@@ -19,13 +19,12 @@ public class GameEngine : Game
 
     protected override void Initialize()
     {
-        _graphics.PreferredBackBufferWidth = 1920;  //1024;
-        _graphics.PreferredBackBufferHeight = 1080; //764;
+        _graphics.PreferredBackBufferWidth = 1920;
+        _graphics.PreferredBackBufferHeight = 1080;
         _graphics.ApplyChanges();
 
         AssetsManager.Initialize(Content, _graphics.GraphicsDevice);
         AssetsManager.LoadContent();
-
 
         var stateComponent = new StateComponent(this);
         var gameState = new GameState(stateComponent.StateMachine);
@@ -37,6 +36,7 @@ public class GameEngine : Game
         stateComponent.StateMachine.Add("GameOver", gameOverState);
 
         stateComponent.StateMachine.Change("Menu");
+
         Components.Add(stateComponent);
 
         base.Initialize();
@@ -59,4 +59,3 @@ public class GameEngine : Game
         base.Draw(gameTime);
     }
 }
-

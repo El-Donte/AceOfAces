@@ -1,6 +1,7 @@
 ﻿using AceOfAces.Controllers;
 using AceOfAces.Models;
 using AceOfAces.Views;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace AceOfAces.Core.FSM;
@@ -11,8 +12,16 @@ public class MenuState : BaseState
     private readonly MenuModel _model;
     private readonly MenuView _view;
     private readonly MenuController _controller;
+
+
+    private RenderTarget2D _nativeRenderTarget;
+    private Rectangle _actualScreenRectangle;
+
     public MenuState(StateMachine stateMachine) : base(stateMachine)
     {
+        _nativeRenderTarget = new RenderTarget2D(StateMachine.GameEngine.GraphicsDevice, 320, 180);
+        _actualScreenRectangle = new Rectangle(0, 0, 1920, 1080);
+
         _spriteBatch = new SpriteBatch(StateMachine.GameEngine.GraphicsDevice);
         _model = new MenuModel();
         _view = new MenuView(_model, _spriteBatch);
@@ -21,8 +30,17 @@ public class MenuState : BaseState
 
     public override void Draw()
     {
+        var graphics = StateMachine.GameEngine.GraphicsDevice;
+        graphics.SetRenderTarget(_nativeRenderTarget);
+        graphics.Clear(Color.CornflowerBlue);
+
         _spriteBatch.Begin();
         _view.Draw();
+        _spriteBatch.End();
+
+        graphics.SetRenderTarget(null);
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+        _spriteBatch.Draw(_nativeRenderTarget, _actualScreenRectangle, Color.White);
         _spriteBatch.End();
     }
 
@@ -52,4 +70,3 @@ public class MenuState : BaseState
         }
     }
 }
-

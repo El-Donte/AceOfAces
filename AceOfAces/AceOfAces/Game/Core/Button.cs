@@ -1,21 +1,18 @@
-﻿using System;
+﻿using AceOfAces.Managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
-namespace AceOfAces.Core;
+using System;
 
 public class Button
 {
-    private MouseState _currentMouse;
+    private const float ScaleFactor = 6f; 
 
-    private SpriteFont _font;
-
+    private MouseState _currentMouseState;
+    private readonly int _height = 24;
+    private readonly int _width = 61;
     private bool _isHovering;
-
-    private MouseState _previousMouse;
-
-    private Texture2D _texture;
+    private MouseState _previousMouseState;
 
     public event EventHandler Click;
 
@@ -29,47 +26,39 @@ public class Button
     {
         get
         {
-            return new Rectangle((int)Position.X, (int)Position.Y, _texture.Width, _texture.Height);
+            return new Rectangle((int)Position.X, (int)Position.Y, _width, _height);
         }
     }
 
     public string Text { get; set; }
 
-
-
-    public Button(Texture2D texture, SpriteFont font)
+    public Button(int width, int height)
     {
-        _texture = texture;
-
-        _font = font;
-
+        _width = width;
+        _height = height;
         PenColour = Color.Black;
     }
 
     public void Draw(SpriteBatch spriteBatch)
     {
-        var colour = Color.White;
+        var colour = Color.White * 0.0f;
 
         if (_isHovering)
-            colour = Color.Gray;
-
-        spriteBatch.Draw(_texture, Rectangle, colour);
-
-        if (!string.IsNullOrEmpty(Text))
         {
-            var x = (Rectangle.X + (Rectangle.Width / 2)) - (_font.MeasureString(Text).X / 2);
-            var y = (Rectangle.Y + (Rectangle.Height / 2)) - (_font.MeasureString(Text).Y / 2);
-
-            spriteBatch.DrawString(_font, Text, new Vector2(x, y), PenColour);
+            colour = Color.Gray * 0.5f;
         }
+
+        spriteBatch.Draw(AssetsManager.PixelTexture, Rectangle, colour);
     }
 
     public void Update()
     {
-        _previousMouse = _currentMouse;
-        _currentMouse = Mouse.GetState();
+        _previousMouseState = _currentMouseState;
+        _currentMouseState = Mouse.GetState();
 
-        var mouseRectangle = new Rectangle(_currentMouse.X, _currentMouse.Y, 1, 1);
+        int mouseX = (int)(_currentMouseState.X / ScaleFactor);
+        int mouseY = (int)(_currentMouseState.Y / ScaleFactor);
+        var mouseRectangle = new Rectangle(mouseX, mouseY, 1, 1);
 
         _isHovering = false;
 
@@ -77,12 +66,10 @@ public class Button
         {
             _isHovering = true;
 
-            if (_currentMouse.LeftButton == ButtonState.Released && _previousMouse.LeftButton == ButtonState.Pressed)
+            if (_currentMouseState.LeftButton == ButtonState.Released && _previousMouseState.LeftButton == ButtonState.Pressed)
             {
                 Click?.Invoke(this, new EventArgs());
             }
         }
     }
 }
-
-

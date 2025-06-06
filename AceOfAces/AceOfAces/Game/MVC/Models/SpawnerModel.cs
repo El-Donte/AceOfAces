@@ -9,6 +9,9 @@ public class SpawnerModel
     private readonly List<EnemyModel> _enemies = [];
     public List<EnemyModel> Enemies => _enemies;
 
+    private Vector2 _position;
+    public Vector2 Position => _position;
+
     private float _gameTimer = 0f;
     public float GameTimer
     {
@@ -17,7 +20,7 @@ public class SpawnerModel
         {
             _gameTimer = value;
 
-            if( _gameTimer > 10f && _enemiesPerSpawn < 5)
+            if( _gameTimer > 40f && _enemiesPerSpawn < 5)
             {
                 _gameTimer = 0;
                 _enemiesPerSpawn++;
@@ -33,7 +36,7 @@ public class SpawnerModel
         {
             if(_spawnTimer >= _spawnInterval)
             {
-                _spawnTimer = 0;
+                value = 0;
             }
 
             _spawnTimer = value;
@@ -47,14 +50,14 @@ public class SpawnerModel
         set => _enemiesPerSpawn = value;
     }
 
-    private float _spawnInterval = 3f;
+    private float _spawnInterval = 10f;
     public float SpawnInterval
     {
         get => _spawnInterval;
         set => _spawnInterval = value;
     }
 
-    private int _maxEnemies = 3;
+    private int _maxEnemies = 8;
     public int MaxEnemies
     {
         get => _maxEnemies;
@@ -67,16 +70,20 @@ public class SpawnerModel
 
     public void AddEnemy(Vector2 position)
     {
-        var enemy = new EnemyModel(position);
-        enemy.DestroyedEvent += OnEnemyDestroyed;
+        var enemy = new EnemyModel(_enemies.Count, position);
+
+        if(_enemies.Count == 0)
+        {
+            enemy.IsTargeted = true;
+        }
+
         _enemies.Add(enemy);
         OnEnemySpawnedEvent?.Invoke(enemy);
     }
 
-    private void OnEnemyDestroyed(GameObjectModel enemy)
+    public void SetPosition(Vector2 position)
     {
-        enemy.DestroyedEvent -= OnEnemyDestroyed;
-        _enemies.Remove((EnemyModel)enemy);
+        _position = position;
     }
 }
 

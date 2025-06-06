@@ -52,68 +52,93 @@ public class GameState : BaseState
         _spriteBatch.End();
     }
 
-    public override void Enter(params object[] args)
+    public override void Enter()
+    {
+        _camera.SetPosition(new Vector2(
+            StateMachine.GameEngine.GraphicsDevice.Viewport.Width / 2,
+            StateMachine.GameEngine.GraphicsDevice.Viewport.Height / 2));
+        _grid.Clear();
+        ParticleEmitter.Initialize();
+
+        var player = CreatePlayer();
+        var spawner = CreateSpawner(player);
+        var missiles = new MissileListModel();
+        var layers = CreateBackgroundLayers();
+
+        RegisterControllers(player, missiles, spawner, layers);
+        RegisterViews(player, missiles, spawner, layers);
+    }
+
+    private PlayerModel CreatePlayer()
+    {
+        var startPosition = new Vector2(
+            StateMachine.GameEngine.GraphicsDevice.Viewport.Width / 2,
+            StateMachine.GameEngine.GraphicsDevice.Viewport.Height / 2);
+
+        var player = new PlayerModel(startPosition);
+
+        player.PositionChangedEvent += _camera.SetPosition;
+        player.PositionChangedEvent += _grid.UpdateGridPosition;
+        player.PlayerDeadEvent += OnGameOver;
+
+        GameEvents.ChangeTragetEvent += player.SetTargetIndex;
+
+        return player;
+    }
+
+    private List<LayerModel> CreateBackgroundLayers()
+    {
+        return new List<LayerModel>
+        {
+            new(AssetsManager.CloudTextures[0], 0.6f, 0.5f, StateMachine.GameEngine.GraphicsDevice.Viewport),
+            new(AssetsManager.CloudTextures[1], 0.8f, 1f, StateMachine.GameEngine.GraphicsDevice.Viewport),
+            new(AssetsManager.CloudTextures[2], 1.1f, 1.4f, StateMachine.GameEngine.GraphicsDevice.Viewport)
+        };
+    }
+
+    private SpawnerModel CreateSpawner(PlayerModel player)
+    {
+        var spawner = new SpawnerModel();
+        player.PositionChangedEvent += spawner.SetPosition;
+        return spawner;
+    }
+
+    private void RegisterControllers(PlayerModel player, MissileListModel missiles, SpawnerModel spawner, List<LayerModel> layers)
     {
         var graphics = StateMachine.GameEngine.GraphicsDevice;
 
-        ParticleEmitter particleEmitter = new ParticleEmitter();
-        
-        GameEvents.OnGameOverEvent += OnGameOver;
-
-        #region Models
-
-        var missles = new MissileListModel();
-        var startPos = new Vector2(graphics.Viewport.Width / 2, graphics.Viewport.Height / 2);
-
-        var playerModel = new PlayerModel(startPos);
-        playerModel.PositionChangedEvent += _camera.SetPosition;
-        playerModel.PositionChangedEvent += _grid.UpdateGridPosition;
-
-        var spawner = new SpawnerModel();
-
-        var layers = new List<LayerModel> {
-            new(AssetsManager.CloudTextures[0], 0.6f, 0.5f, graphics.Viewport),
-            new(AssetsManager.CloudTextures[1], 0.8f, 1f, graphics.Viewport),
-            new(AssetsManager.CloudTextures[2], 1.1f, 1.4f, graphics.Viewport)
-        };
-        #endregion
-
-        #region Controllers
         _controllers.Add(new ParticleContorller());
-        _controllers.Add(new PlayerController(playerModel, missles, spawner));
+        _controllers.Add(new PlayerController(player, missiles, spawner));
         _controllers.Add(new SpawnerController(spawner, graphics));
-        _controllers.Add(new EnemyController(spawner, playerModel, missles));
-        _controllers.Add(new MissileController(missles));
+        _controllers.Add(new EnemyController(_grid, spawner, player, missiles));
+        _controllers.Add(new MissileController(missiles));
         _controllers.Add(new CollisionController(_grid));
-        _controllers.Add(new GridController(_grid, playerModel, missles, spawner));
-        _controllers.Add(new BackGroundController(layers, playerModel));
-        #endregion
+        _controllers.Add(new GridController(_grid, player, missiles, spawner));
+        _controllers.Add(new BackGroundController(layers, player));
+    }
 
-        #region Views
-        _views.Add(new BackgroundView(layers, playerModel, _spriteBatch));
+    private void RegisterViews(PlayerModel player, MissileListModel missiles, SpawnerModel spawner, List<LayerModel> layers)
+    {
+        _views.Add(new BackgroundView(layers, player, _spriteBatch));
         _views.Add(new ParticleView(_spriteBatch));
-        _views.Add(new PlayerView(playerModel, _spriteBatch));
+        _views.Add(new PlayerView(player, _spriteBatch));
         _views.Add(new EnemyView(spawner, _spriteBatch));
-        _views.Add(new MissilesView(missles, _spriteBatch));
-        _views.Add(new DebugView(_grid, playerModel, spawner, missles, _spriteBatch));
+        _views.Add(new MissilesView(missiles, _spriteBatch));
+        _views.Add(new DebugView(_grid, player, spawner, missiles, _spriteBatch));
 
-        for (int i = 0; i < playerModel.Cooldowns.Count; i++)
+        for (int i = 0; i < player.Cooldowns.Count; i++)
         {
             var screenMargin = new Vector2(20 + 60 * i, 50);
-
-            var bar = new CooldownBarView(missles.Cooldowns[i], screenMargin, _spriteBatch)
-            { Camera = _camera, GraphicsDevice = graphics };
-
+            var bar = new CooldownBarView(missiles.Cooldowns[i], screenMargin, _spriteBatch,
+                StateMachine.GameEngine.GraphicsDevice.Viewport, _camera);
             _views.Add(bar);
         }
-        #endregion
     }
 
     public override void Exit()
     {
         _views.Clear();
         _controllers.Clear();
-        GameEvents.OnGameOverEvent -= OnGameOver;
     }
 
     private void OnGameOver() => StateMachine.Change("GameOver");

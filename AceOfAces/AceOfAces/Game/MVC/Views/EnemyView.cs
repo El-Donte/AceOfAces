@@ -9,8 +9,8 @@ namespace AceOfAces.Views;
 public class EnemyView : IView
 {
     private readonly Texture2D _missileTexture = AssetsManager.MissileTexture;
-    private readonly Texture2D _pixelTexture = AssetsManager.PixelTexture;
     private readonly Vector2 _missileOrigin;
+    private readonly Texture2D _pixelTexture = AssetsManager.PixelTexture;
 
     private readonly Texture2D _enemyTexture = AssetsManager.EnemyTexture;
     private readonly Vector2 _enemyOrigin;

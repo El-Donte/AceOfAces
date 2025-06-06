@@ -9,11 +9,11 @@ public abstract class BaseState : IState
         StateMachine = stateMachine;
     }
 
+    public abstract void Enter();
+
     public abstract void Update(float deltaTime);
 
     public abstract void Draw();
-
-    public abstract void Enter(params object[] args);
 
     public abstract void Exit();
 }

@@ -23,6 +23,16 @@ public class MissileModel : GameObjectModel
     #endregion
 
     #region Speed
+    public Vector2 Position 
+    {
+        get => _position;
+        set
+        {
+            _position = value;
+            _collider.UpdateBounds(_position, _rotation);
+        }
+    }
+
     private readonly float _speed = 800f;
     public float Speed => _speed;
 
@@ -83,11 +93,5 @@ public class MissileModel : GameObjectModel
     public MissileModel(Vector2 position) : base(position)
     {
         _collider = new ColliderModel(AssetsManager.MissileTexture.Height, AssetsManager.MissileTexture.Width, 4f, 0.8f);
-    }
-
-    public void SetPosition(Vector2 position)
-    {
-        _position += position;
-        _collider.UpdateBounds(_position, _rotation);
     }
 }

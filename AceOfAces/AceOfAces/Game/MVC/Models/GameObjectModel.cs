@@ -15,7 +15,7 @@ public class GameObjectModel : IDisposable
     private bool _isDestroyed;
     public bool IsDestroyed => _isDestroyed;
 
-    public event Action<GameObjectModel> DestroyedEvent;
+    public Action<GameObjectModel> DestroyedEvent;
     #endregion
 
     #region Position

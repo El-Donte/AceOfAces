@@ -9,27 +9,25 @@ namespace AceOfAces.Models;
 public class PlayerModel : GameObjectModel, ITarget
 {
     #region Health
-    private int _health = 4;
+    private int _health = 6;
     public int Health
     {
         get => _health;
         set
         {
             _health = value;
-            Console.WriteLine(_health);
             if (_health <= 0)
             {
-                GameEvents.TriggerGameOver();
+                PlayerDeadEvent.Invoke();
             }
         }
     }
+    public event Action PlayerDeadEvent;
 
     public event Action<bool> OnDamagedEvent;
     #endregion
 
     #region Rotation
-    //public event Action<float> RotationChanged;
-
     private readonly float _rotationSpeed = 5f;
     public float RotationSpeed => _rotationSpeed;
 
@@ -39,6 +37,21 @@ public class PlayerModel : GameObjectModel, ITarget
         get => _rotation;
         set => _rotation = value;
     }
+    #endregion
+
+    #region Position
+    public Vector2 Position
+    {
+        get => _position;
+        set
+        {
+            _position = value;
+            _collider.UpdateBounds(_position, _rotation);
+            PositionChangedEvent?.Invoke(_position);
+        }
+    }
+
+    public event Action<Vector2> PositionChangedEvent;
     #endregion
 
     #region Speed
@@ -75,10 +88,15 @@ public class PlayerModel : GameObjectModel, ITarget
         set
         {
             _invulnerabilityTimer = value;
+            if (_invulnerabilityTimer <= 0) 
+            { 
+                _collider.IsEnable = true;
+            }
+
         }
     }
 
-    public bool IsInvulnerable => _invulnerabilityTimer > 0; // Находится ли игрок в состоянии неуязвимости
+    public bool IsInvulnerable => _invulnerabilityTimer > 0;
     #endregion
 
     #region Blink
@@ -90,11 +108,11 @@ public class PlayerModel : GameObjectModel, ITarget
         set
         {
             _blinkPhase = value;
-            OnBlinkPhaseChangedEvent?.Invoke(_blinkPhase);
+            BlinkPhaseChangedEvent?.Invoke(_blinkPhase);
         }
     }
 
-    public event Action<float> OnBlinkPhaseChangedEvent;
+    public event Action<float> BlinkPhaseChangedEvent;
     #endregion
 
     #region Missile
@@ -130,8 +148,6 @@ public class PlayerModel : GameObjectModel, ITarget
     }
     #endregion
 
-    public event Action<Vector2> PositionChangedEvent;
-
     public PlayerModel(Vector2 position) : base(position)
     {
         _collider = new ColliderModel(AssetsManager.PlayerTexture.Width, AssetsManager.PlayerTexture.Height, 5f, 0.5f);
@@ -142,11 +158,9 @@ public class PlayerModel : GameObjectModel, ITarget
         }
     }
 
-    public void SetPosition(Vector2 position)
-    {
-        _position += position;
-        _collider.UpdateBounds(_position, _rotation);
-        PositionChangedEvent?.Invoke(_position);
+    public void SetTargetIndex(int index)
+    { 
+        _targetIndex = index; 
     }
 
     public void TakeDamage(int damage)
@@ -157,6 +171,8 @@ public class PlayerModel : GameObjectModel, ITarget
         }
 
         Health -= damage;
+
+        _collider.IsEnable = false;
 
         _invulnerabilityTimer = 1.5f;
 

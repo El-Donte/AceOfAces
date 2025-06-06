@@ -3,13 +3,16 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AceOfAces.Core;
+
+public record Point(int x, int y);
 
 public class Grid
 {
     private readonly GraphicsDevice _graphics;
-    private readonly GameObjectModel[,] _cells;
+    private readonly List<GameObjectModel>[,] _cells;
     private Rectangle _gridBounds;
 
     private Vector2 _gridWorldPosition;
@@ -24,18 +27,27 @@ public class Grid
     private readonly int _height;
     public int Height => _height;
 
-    private readonly HashSet<GameObjectModel> _activeObjects = [];
-    public HashSet<GameObjectModel> ActiveObjects => _activeObjects;
+    private readonly Dictionary<GameObjectModel, Point> _objectPositions = new();
+    public List<GameObjectModel> ActiveObjects => _objectPositions.Keys.ToList();
 
-    public Grid(int cellSize, GraphicsDevice graphics )
+    public Grid(int cellSize, GraphicsDevice graphics)
     {
         _cellSize = cellSize;
         _graphics = graphics;
 
         _width = (int)Math.Ceiling((float)_graphics.Viewport.Width / cellSize) + 2;
-        _height =(int)Math.Ceiling((float)_graphics.Viewport.Height / cellSize) + 2;
+        _height = (int)Math.Ceiling((float)_graphics.Viewport.Height / cellSize) + 2;
 
-        _cells = new GameObjectModel[_width, _height];
+        _cells = new List<GameObjectModel>[_width, _height];
+
+        for (int x = 0; x < _width; x++)
+        {
+            for (int y = 0; y < _height; y++)
+            {
+                _cells[x, y] = [];
+            }
+        }
+
         _gridBounds = new Rectangle(0, 0, _width * _cellSize, _height * _cellSize);
     }
 
@@ -43,8 +55,7 @@ public class Grid
     {
         _gridWorldPosition = new Vector2(
             centerPosition.X - (_width * _cellSize) / 2,
-            centerPosition.Y - (_height * _cellSize) / 2
-        );
+            centerPosition.Y - (_height * _cellSize) / 2);
 
         _gridBounds.X = (int)_gridWorldPosition.X;
         _gridBounds.Y = (int)_gridWorldPosition.Y;
@@ -52,28 +63,35 @@ public class Grid
 
     public void AddObject(GameObjectModel obj)
     {
-        if (!_gridBounds.Contains(obj.Position))
+        if (obj.IsDestroyed || !_gridBounds.Contains(obj.Position))
         {
             return;
         }
 
-        Vector2 gridRelativePos = obj.Position - _gridWorldPosition;
-        int x = (int)(gridRelativePos.X / _cellSize);
-        int y = (int)(gridRelativePos.Y / _cellSize);
+        RemoveObject(obj);
 
-        var isInGrid = x >= 0 && x < _width && y >= 0 && y < _height;
-        if (isInGrid)
+        var pos = GetCellCoordinates(obj.Position);
+        if (IsInGrid(pos.x, pos.y))
         {
-            _cells[x, y] = obj;
+            _cells[pos.x, pos.y].Add(obj);
+            _objectPositions[obj] = pos;
+        }
+    }
+
+    public void RemoveObject(GameObjectModel obj)
+    {
+        if (_objectPositions.TryGetValue(obj, out var coords))
+        {
+            _cells[coords.x, coords.y].Remove(obj);
+            _objectPositions.Remove(obj);
         }
     }
 
     public List<GameObjectModel> GetNearbyObjects(Vector2 position, int radiusInCells = 2)
     {
         var result = new List<GameObjectModel>();
-
-        if (!_gridBounds.Contains(position)) 
-        { 
+        if (!_gridBounds.Contains(position))
+        {
             return result;
         }
 
@@ -83,21 +101,29 @@ public class Grid
         {
             for (int y = minY; y <= maxY; y++)
             {
-                if (_cells[x, y] != null)
-                {
-                    result.Add(_cells[x, y]);
-                }
+                result.AddRange(_cells[x, y]);
             }
         }
 
         return result;
     }
 
-    private (int minX, int maxX, int minY, int maxY) GetBounds(Vector2 position, int radiusInCells = 2)
+    private Point GetCellCoordinates(Vector2 worldPos)
     {
-        Vector2 gridRelativePos = position - _gridWorldPosition;
-        int centerX = (int)(gridRelativePos.X / _cellSize);
-        int centerY = (int)(gridRelativePos.Y / _cellSize);
+        Vector2 gridRelativePos = worldPos - _gridWorldPosition;
+        int x = (int)(gridRelativePos.X / _cellSize);
+        int y = (int)(gridRelativePos.Y / _cellSize);
+        return new Point(x, y);
+    }
+
+    private bool IsInGrid(int x, int y) =>
+        x >= 0 && x < _width && y >= 0 && y < _height;
+
+    private (int minX, int maxX, int minY, int maxY) GetBounds(Vector2 position, int radiusInCells)
+    {
+        var coords = GetCellCoordinates(position);
+        int centerX = coords.x;
+        int centerY = coords.y;
 
         int minX = Math.Max(centerX - radiusInCells, 0);
         int maxX = Math.Min(centerX + radiusInCells, _width - 1);
@@ -105,5 +131,18 @@ public class Grid
         int maxY = Math.Min(centerY + radiusInCells, _height - 1);
 
         return (minX, maxX, minY, maxY);
+    }
+
+    public void Clear()
+    {
+        for (int x = 0; x < _width; x++)
+        {
+            for (int y = 0; y < _height; y++)
+            {
+                _cells[x, y].Clear();
+            }
+        }
+
+        _objectPositions.Clear();
     }
 }

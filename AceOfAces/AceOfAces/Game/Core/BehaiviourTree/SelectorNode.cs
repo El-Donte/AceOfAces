@@ -1,11 +1,10 @@
 ﻿using AceOfAces.Models;
-using System.Collections.Generic;
 
 namespace AceOfAces.BehaiviourTree;
 
 public class SelectorNode : Node
 {
-    public SelectorNode(List<Node> children) => Children.AddRange(children);
+    public SelectorNode() { }
 
     public override bool Evaluate(EnemyModel enemy, float deltaTime)
     {

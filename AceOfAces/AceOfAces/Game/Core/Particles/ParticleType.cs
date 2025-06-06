@@ -5,4 +5,3 @@ public enum ParticleType
     Explosion,
     BulletTrail,
 }
-

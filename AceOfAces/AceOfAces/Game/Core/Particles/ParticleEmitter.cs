@@ -4,24 +4,24 @@ using System.Collections.Generic;
 
 namespace AceOfAces.Core.Particles;
 
-public class ParticleEmitter
+public static class ParticleEmitter
 {
-    private readonly Dictionary<ParticleType, ParticleEmitterData> _presets = new()
+    private static readonly Dictionary<ParticleType, ParticleEmitterData> _presets = new()
     {
         {
             ParticleType.Explosion,
             new ParticleEmitterData
             {
-                emitCount = 20,
-                interval = 0.1f,
-                lifespanMin = 0.5f,
-                lifespanMax = 1f,
-                speedMin = 100f,
-                speedMax = 300f,
-                particleData = new ParticleData
+                EmitCount = 30,
+                Interval = 0.01f,
+                LifespanMin = 0.5f,
+                LifespanMax = 1f,
+                SpeedMin = 100f,
+                SpeedMax = 300f,
+                ParticleData = new ParticleData
                 {
-                    colorStart = Color.Orange,
-                    colorEnd = Color.Red
+                    ColorStart = Color.Orange,
+                    ColorEnd = Color.Red
                 }
             }
         },
@@ -29,48 +29,48 @@ public class ParticleEmitter
             ParticleType.BulletTrail,
             new ParticleEmitterData
             {
-                emitCount = 1,
-                interval = 0.05f,
-                lifespanMin = 0.5f,
-                lifespanMax = 1f,
-                speedMin = 50f,
-                speedMax = 100f,
-                particleData = new ParticleData
+                EmitCount = 3,
+                Interval = 0.1f,
+                LifespanMin = 0.2f,
+                LifespanMax = 0.7f,
+                SpeedMin = 10f,
+                SpeedMax = 50f,
+                ParticleData = new ParticleData
                 {
-                    colorStart = Color.DarkRed,
-                    colorEnd = Color.Transparent
+                   ColorStart = Color.DarkGray,
+                   ColorEnd = Color.LightSlateGray
                 }
             }
         }
     };
 
-    private readonly Random _random = new();
+    private static readonly Random _random = new();
 
-    public ParticleEmitter()
+    public static void Initialize()
     {
-        GameEvents.OnExplosionEvent += (position) => Emit(ParticleType.Explosion, position);
-        GameEvents.OnBulletTrailEvent += (position) => Emit(ParticleType.BulletTrail, position);
+        GameEvents.ExplosionEvent += (position) => Emit(ParticleType.Explosion, position);
+        GameEvents.BulletTrailEvent += (position) => Emit(ParticleType.BulletTrail, position);
     }
 
-    private void Emit(ParticleType type, Vector2 position)
+    private static void Emit(ParticleType type, Vector2 position)
     {
         if (!_presets.TryGetValue(type, out var data))
         {
             return;
         }
 
-        for (int i = 0; i < data.emitCount; i++)
+        for (int i = 0; i < data.EmitCount; i++)
         {
-            ParticleData d = data.particleData;
+            ParticleData particle = data.ParticleData;
 
-            d.lifespan = (float)(_random.NextDouble() * (data.lifespanMax - data.lifespanMin)) + data.lifespanMin;
-            d.speed = (float)(_random.NextDouble() * (data.speedMax - data.speedMin)) + data.speedMin;
+            particle.Lifespan = (float)(_random.NextDouble() * (data.LifespanMax - data.LifespanMin)) + data.LifespanMin;
+            particle.Speed = (float)(_random.NextDouble() * (data.SpeedMax - data.SpeedMin)) + data.SpeedMin;
 
-            var angleMin = data.angle - data.angleVariance;
-            var angleMax = data.angle + data.angleVariance;
-            d.angle = (float)(_random.NextDouble() * (angleMax - angleMin)) + angleMin;
+            var angleMin = data.Angle - data.AngleVariance;
+            var angleMax = data.Angle + data.AngleVariance;
+            particle.Angle = (float)(_random.NextDouble() * (angleMax - angleMin)) + angleMin;
 
-            ParticleModel p = new(position, d);
+            ParticleModel p = new(position, particle);
             ParticleSystem.AddParticle(p);
         }
     }

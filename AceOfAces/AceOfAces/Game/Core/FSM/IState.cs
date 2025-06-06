@@ -2,11 +2,11 @@
 
 public interface IState
 {
+    void Enter();
+
     void Update(float deltaTime);
 
     void Draw();
-
-    void Enter(params object[] args);
 
     void Exit();
 }

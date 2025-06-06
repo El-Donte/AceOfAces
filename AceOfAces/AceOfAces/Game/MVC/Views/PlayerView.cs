@@ -10,6 +10,7 @@ public class PlayerView : IView
 {
     private readonly Texture2D _missileTexture = AssetsManager.MissileTexture;
     private readonly Vector2 _missileOrigin;
+
     private readonly Texture2D _playerTexture = AssetsManager.PlayerTexture;
     private readonly Vector2 _playerOrigin;
 
@@ -27,7 +28,7 @@ public class PlayerView : IView
 
         _spriteBatch = spriteBatch;
 
-        _player.OnBlinkPhaseChangedEvent += SetAlpha;
+        _player.BlinkPhaseChangedEvent += SetAlpha;
     }
 
     public void Draw()

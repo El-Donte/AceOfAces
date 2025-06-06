@@ -1,6 +1,4 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-
-namespace AceOfAces.Views;
+﻿namespace AceOfAces.Views;
 
 public interface IView
 {

@@ -43,25 +43,26 @@ public class ParticleModel
                 return;
             }
 
-            _color = Color.Lerp(_data.colorEnd, _data.colorStart, _lifespanAmount);
-            _opacity = MathHelper.Clamp(MathHelper.Lerp(_data.opacityEnd, _data.opacityStart, _lifespanAmount), 0, 1);
-            _scale = MathHelper.Lerp(_data.sizeEnd, _data.sizeStart, _lifespanAmount) / _data.texture.Width;
-            _lifespanAmount = MathHelper.Clamp(_lifespanLeft / _data.lifespan, 0, 1);
+            _color = Color.Lerp(_data.ColorEnd, _data.ColorStart, _lifespanAmount);
+            _opacity = MathHelper.Clamp(MathHelper.Lerp(_data.OpacityEnd, _data.OpacityStart, _lifespanAmount), 0, 1);
+            _scale = MathHelper.Lerp(_data.SizeEnd, _data.SizeStart, _lifespanAmount) / _data.Texture.Width;
+            _lifespanAmount = MathHelper.Clamp(_lifespanLeft / _data.Lifespan, 0, 1);
         }
     }
 
     public ParticleModel(Vector2 pos, ParticleData data)
     {
         _data = data;
-        _lifespanLeft = data.lifespan;
+        _lifespanLeft = data.Lifespan;
         _lifespanAmount = 1f;
         _position = pos;
-        _color = data.colorStart;
-        _opacity = data.opacityStart;
-        if (data.speed != 0)
+        _color = data.ColorStart;
+        _opacity = data.OpacityStart;
+
+        if (data.Speed != 0)
         {
-            _data.angle = MathHelper.ToRadians(_data.angle);
-            _direction = new Vector2((float)Math.Sin(_data.angle), -(float)Math.Cos(_data.angle));
+            _data.Angle = MathHelper.ToRadians(_data.Angle);
+            _direction = new Vector2((float)Math.Sin(_data.Angle), -(float)Math.Cos(_data.Angle));
         }
         else
         {

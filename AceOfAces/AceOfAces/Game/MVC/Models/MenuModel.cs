@@ -5,8 +5,9 @@ namespace AceOfAces.Models;
 public class MenuModel
 {
     private readonly Button _quitButton;
-    private readonly Button _playButton;
     public Button QuitButton => _quitButton; 
+
+    private readonly Button _playButton;
     public Button PlayButton => _playButton;
 
     public bool Play { get; set; }

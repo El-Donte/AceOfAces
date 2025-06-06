@@ -1,4 +1,5 @@
-﻿using AceOfAces.Models;
+﻿using AceOfAces.Core;
+using AceOfAces.Models;
 using Microsoft.Xna.Framework;
 using System;
 
@@ -26,7 +27,9 @@ public class MissileController(MissileListModel _missilesList) : IController
             UpdateMissileVelocity(missile, desiredDirection, deltaTime);
             UpdateMissileRotation(missile);
 
-            missile.SetPosition(missile.Velocity * deltaTime);
+            missile.Position += missile.Velocity * deltaTime;
+            GameEvents.TriggerBulletTrail(missile.Position);
+
             missile.Lifespan -= deltaTime;
         }
     }

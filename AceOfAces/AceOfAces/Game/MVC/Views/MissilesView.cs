@@ -23,8 +23,9 @@ public class MissilesView : IView
 
     public void Draw()
     {
-        foreach (var missile in _missileList.Missiles)
+        for(int i = 0; i < _missileList.Missiles.Count; i++)
         {
+            var missile = _missileList.Missiles[i];
             _spriteBatch.Draw(
                 _missileTexture,
                 missile.Position,

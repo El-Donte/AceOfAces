@@ -21,17 +21,19 @@ public class ParticleView : IView
 
     public void Draw()
     {
-        foreach (var particle in _particles) 
-        { 
-            _spriteBatch.Draw(particle.ParticleData.texture, 
-                particle.Position, 
-                null, 
-                particle.Color * particle.Opacity, 
-                0f, 
-                _origin, 
-                particle.Scale, 
-                SpriteEffects.None, 
-                1f);
+        foreach (var particle in _particles)
+        {
+            _spriteBatch.Draw(
+                particle.ParticleData.Texture,
+                particle.Position,
+                null,
+                particle.Color * particle.Opacity,
+                0f,
+                _origin,
+                particle.Scale,
+                SpriteEffects.None,
+                0f
+            );
         }
     }
 }

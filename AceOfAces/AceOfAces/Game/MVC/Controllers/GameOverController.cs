@@ -1,5 +1,4 @@
 ﻿using AceOfAces.Models;
-using System;
 
 namespace AceOfAces.Controllers;
 
@@ -14,12 +13,12 @@ public class GameOverController : IController
         _model.PlayAgainButton.Click += PlayAgainButtonClicked;
     }
 
-    private void PlayAgainButtonClicked(object sender, EventArgs e)
+    private void PlayAgainButtonClicked()
     {
         _model.PlayAgain = true;
     }
 
-    private void QuitButtonClicked(object sender, EventArgs e)
+    private void QuitButtonClicked()
     {
         _model.Menu = true;
     }
@@ -30,4 +29,3 @@ public class GameOverController : IController
         _model.PlayAgainButton.Update();
     }
 }
-

@@ -6,19 +6,15 @@ using System;
 
 public class Button
 {
-    private const float ScaleFactor = 6f; 
-
-    private MouseState _currentMouseState;
+    private readonly float _scaleFactor = 6f; 
     private readonly int _height = 24;
     private readonly int _width = 61;
-    private bool _isHovering;
+
+    private MouseState _currentMouseState;
     private MouseState _previousMouseState;
+    private bool _isHovering;
 
-    public event EventHandler Click;
-
-    public bool Clicked { get; private set; }
-
-    public Color PenColour { get; set; }
+    public event Action Click;
 
     public Vector2 Position { get; set; }
 
@@ -30,13 +26,10 @@ public class Button
         }
     }
 
-    public string Text { get; set; }
-
     public Button(int width, int height)
     {
         _width = width;
         _height = height;
-        PenColour = Color.Black;
     }
 
     public void Draw(SpriteBatch spriteBatch)
@@ -56,8 +49,8 @@ public class Button
         _previousMouseState = _currentMouseState;
         _currentMouseState = Mouse.GetState();
 
-        int mouseX = (int)(_currentMouseState.X / ScaleFactor);
-        int mouseY = (int)(_currentMouseState.Y / ScaleFactor);
+        int mouseX = (int)(_currentMouseState.X / _scaleFactor);
+        int mouseY = (int)(_currentMouseState.Y / _scaleFactor);
         var mouseRectangle = new Rectangle(mouseX, mouseY, 1, 1);
 
         _isHovering = false;
@@ -68,7 +61,7 @@ public class Button
 
             if (_currentMouseState.LeftButton == ButtonState.Released && _previousMouseState.LeftButton == ButtonState.Pressed)
             {
-                Click?.Invoke(this, new EventArgs());
+                Click?.Invoke();
             }
         }
     }

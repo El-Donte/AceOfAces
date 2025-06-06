@@ -7,25 +7,32 @@ public class ColliderModel
 {
     private readonly int _width;
     private readonly int _height;
-    private readonly float _koeff;
+    private readonly float _sizeKoeff;
     private readonly float _scale;
 
     private Rectangle _bounds;
     public Rectangle Bounds => _bounds;
 
-    public ColliderModel(int width, int height, float koeff, float scale = 1.0f)
+    private bool _isEnable = true;
+    public bool IsEnable 
+    {
+        get => _isEnable; 
+        set => _isEnable = value; 
+    }
+
+    public ColliderModel(int width, int height, float sizeKoeff, float scale = 1.0f)
     {
         _width = width;
         _height = height;
-        _koeff = koeff;
+        _sizeKoeff = sizeKoeff;
         _scale = Math.Clamp(scale, 0.1f, 2.0f);
     }
 
     public void UpdateBounds(Vector2 position, float rotation)
     {
         Vector2 center = new(
-            position.X - (_width / _koeff) + _width / 5,
-            position.Y - (_height / _koeff) + _height / 5
+            position.X - (_width / _sizeKoeff) + _width / 5,
+            position.Y - (_height / _sizeKoeff) + _height / 5
         );
 
         float scaledWidth = _width * _scale;

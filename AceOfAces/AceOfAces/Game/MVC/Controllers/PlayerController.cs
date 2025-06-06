@@ -1,10 +1,10 @@
-﻿using AceOfAces.Core;
-using AceOfAces.Managers;
+﻿using AceOfAces.Managers;
 using AceOfAces.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AceOfAces.Controllers;
 
@@ -31,8 +31,10 @@ public class PlayerController : IController
     {
         InputUpdate();
         UpdateMovement(deltaTime);
+
         UpdateBlinking();
         UpdateInvurTimer(deltaTime);
+
         ChangeTarget();
         Fire();
     }
@@ -47,12 +49,12 @@ public class PlayerController : IController
         Vector2 direction = new((float)Math.Sin(_player.Rotation), -(float)Math.Cos(_player.Rotation));
         _player.Velocity = (_inputDirection.Y + 2) * direction * _player.CurrentSpeed;
 
-        _player.SetPosition(_player.Velocity * deltaTime);
+        _player.Position += _player.Velocity * deltaTime;
     }
 
-    private void UpdateSpeed(int k, bool isBreaking, float deltaTime)
+    private void UpdateSpeed(int koeff, bool isBreaking, float deltaTime)
     {
-        _player.CurrentSpeed += k * (isBreaking ? -_player.Decceleration : _player.Acceleration) * deltaTime;
+        _player.CurrentSpeed += koeff * (isBreaking ? -_player.Decceleration : _player.Acceleration) * deltaTime;
     }
 
     private void InputUpdate()
@@ -63,20 +65,17 @@ public class PlayerController : IController
 
     private void Fire()
     {
-        if (_enemies.Count == 0 || _player.TargetIndex >= _enemies.Count)
+        var availableCooldown = _player.Cooldowns.FirstOrDefault(c => c.AvailableToFire);
+        if (_enemies.Count == 0 || _player.TargetIndex >= _enemies.Count || availableCooldown == null)
         {
             return;
         }
 
-        var target = _enemies[_player.TargetIndex];
-        if (InputManager.IsKeyPressed(Keys.Space) && 
-            (_player.Cooldowns[0].AvailableToFire || 
-             _player.Cooldowns[1].AvailableToFire))
+        if (InputManager.IsKeyPressed(Keys.Space))
         {
-            _missiles.CreateMissile(_player.Position + _player.MissileJointPosition,_player , target);
+            var target = _enemies[_player.TargetIndex];
+            _missiles.CreateMissile(_player.Position + _player.MissileJointPosition, _player, target);
             _player.FiredMissileCount++;
-
-            GameEvents.TriggerBulletTrail(_player.Position);
         }
     }
 
@@ -87,13 +86,13 @@ public class PlayerController : IController
             return;
         }
 
+        _enemies[_player.TargetIndex].IsTargeted = true;
+
         if (InputManager.IsKeyPressed(Keys.E))
         {
             _enemies[_player.TargetIndex].IsTargeted = false;
 
             _player.TargetIndex = (_player.TargetIndex + 1) % _enemies.Count;
-
-            _enemies[_player.TargetIndex].IsTargeted = true;
         }
     }
 
@@ -128,4 +127,3 @@ public class PlayerController : IController
         _player.DestroyedEvent -= OnPlayerDestroyed;
     }
 }
-

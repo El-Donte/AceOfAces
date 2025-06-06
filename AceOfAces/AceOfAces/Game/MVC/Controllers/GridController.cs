@@ -8,41 +8,42 @@ public class GridController : IController
 {
     private readonly PlayerModel _player;
     private readonly List<EnemyModel> _enemies;
-    private readonly MissileListModel _missileList;
-
+    private readonly List<MissileModel> _missiles;
     private readonly Grid _grid;
 
-    public GridController(Grid grid, PlayerModel player, MissileListModel missiles,SpawnerModel spawner) 
-    { 
+    public GridController(Grid grid, PlayerModel player, MissileListModel missiles, SpawnerModel spawner)
+    {
         _grid = grid;
         _player = player;
-        _missileList = missiles;
+        _missiles = missiles.Missiles;
         _enemies = spawner.Enemies;
     }
 
     public void Update(float deltaTime)
     {
-        UpdateActiveObjects();
-        RegisterObjectsInGrid();
-    }
+        _grid.UpdateGridPosition(_player.Position);
 
-    private void UpdateActiveObjects()
-    {
-        _grid.ActiveObjects.Clear();
-        _grid.ActiveObjects.Add(_player);
-        _grid.ActiveObjects.UnionWith(_missileList.Missiles);
-        _grid.ActiveObjects.UnionWith(_enemies);
-    }
-
-    private void RegisterObjectsInGrid()
-    {
-        foreach (var obj in _grid.ActiveObjects)
+        UpdateObjects(_player);
+        foreach (var enemy in _enemies)
         {
-            if (!obj.IsDestroyed)
-            {
-                _grid.AddObject(obj);
-            }
+            UpdateObjects(enemy);
+        }
+
+        foreach (var missile in _missiles)
+        {
+            UpdateObjects(missile);
+        }
+    }
+
+    private void UpdateObjects(GameObjectModel obj)
+    {
+        if (obj.IsDestroyed)
+        {
+            _grid.RemoveObject(obj);
+        }
+        else
+        {
+            _grid.AddObject(obj);
         }
     }
 }
-

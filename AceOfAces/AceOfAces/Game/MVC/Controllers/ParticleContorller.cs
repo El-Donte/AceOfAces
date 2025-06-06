@@ -1,28 +1,24 @@
 ﻿using AceOfAces.Core.Particles;
-using System.Collections.Generic;
 
 namespace AceOfAces.Controllers;
 
 public class ParticleContorller : IController
 {
-    private readonly List<ParticleModel> _particles = new List<ParticleModel>();
-    public ParticleContorller() 
-    {
-        _particles = ParticleSystem.Particles;
-    }
-
     public void Update(float deltaTime)
     {
-        foreach (var particle in _particles)
+        var particles = ParticleSystem.Particles;
+
+        for (int i = 0; i < particles.Count; i++)
         {
-            particle.LifespanLeft -= deltaTime;
-            if(particle.isFinished)
+            var p = particles[i];
+            p.LifespanLeft -= deltaTime;
+
+            if (!p.isFinished)
             {
-                break;
+                p.Position += p.Direction * p.ParticleData.Speed * deltaTime;
             }
-            particle.Position += particle.Direction * particle.ParticleData.speed * deltaTime;
         }
 
-        _particles.RemoveAll(p => p.isFinished);
+        ParticleSystem.Particles.RemoveAll(p => p.isFinished);
     }
 }

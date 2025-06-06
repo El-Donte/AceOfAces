@@ -8,75 +8,95 @@ namespace AceOfAces.Models;
 
 public class EnemyModel : GameObjectModel, ITarget
 {
+    private readonly Random _random = new Random();
+
     #region Health
-    private int _health = 2;
-    public int Health => _health;
+    private readonly int _id;
+    public int Id => _id;
+
+    private int _health = 1;
     #endregion
 
     #region Rotation
-    private readonly float _evasionAngle = MathHelper.ToRadians(60);
-    public float EvasionAngle => _evasionAngle;
+    private readonly float _evasionradius = 300f;
+    public float EvasionRadius => _evasionradius;
 
-    private readonly float _rotationSpeed = 1.3f;
+    private readonly float _rotationSpeed = 1.6f;
     public float RotationSpeed => _rotationSpeed;
 
     private float _rotation;
     public float Rotation 
     { 
-        get => _rotation;
-        set
-        {
-            _rotation = value;
-        }
+        get => _rotation; 
+        set => _rotation = value; 
     }
     #endregion
 
     #region Speed
-    private readonly float _evasionKoeff = 1.2f;
+    public Vector2 Position
+    {
+        get => _position;
+        set
+        {
+            _position = value;
+            _collider.UpdateBounds(_position, _rotation);
+        }
+    }
 
-    private float _currentSpeed = 400f;
-    public float CurrentSpeed => _currentSpeed;
+    private readonly float _evasionKoeff = 2f;
+    public float EvasionKoeff => _evasionKoeff;
 
-    private readonly float _acceleration = 100f;
-    public float Acceleration => _acceleration;
+    private float _speed;
+    public float Speed 
+    { 
+        get => _speed;
+        set => _speed = Math.Clamp(value, _minSpeed, _maxSpeed); 
+    }
 
     private readonly float _minSpeed = 450f;
     private readonly float _maxSpeed = 600f;
 
     private Vector2 _velocity = Vector2.Zero;
-    public Vector2 Velocity
-    {
-        get => _velocity;
+    public Vector2 Velocity 
+    { 
+        get => _velocity; 
         set => _velocity = value;
     }
     #endregion
 
     #region Target
     private bool _isTargeted = false;
-    public bool IsTargeted
+    public bool IsTargeted 
     {
         get => _isTargeted;
-        set => _isTargeted = value;
+        set => _isTargeted = value; 
     }
 
     private readonly float _pursuitRadius = 400f;
     public float PursuitRadius => _pursuitRadius;
 
     private Vector2 _targetPosition;
-    public Vector2 TargetPosition
+    public Vector2 TargetPosition 
     {
-        get => _targetPosition;
-        set => _targetPosition = value;
+        get => _targetPosition; 
+        set => _targetPosition = value; 
     }
 
     private bool _isPursuingPlayer = false;
-    public bool IsPursuingPlayer
-    {
-        get => _isPursuingPlayer;
-        set => _isPursuingPlayer = value;
+    public bool IsPursuingPlayer 
+    { 
+        get => _isPursuingPlayer; 
+        set => _isPursuingPlayer = value; 
     }
 
-    private readonly float _fieldOfViewAngle = MathHelper.ToRadians(60);
+    private bool _isEvading = false;
+    public bool IsEvading 
+    { 
+        get => _isEvading; 
+        set => _isEvading = value; 
+    }
+
+    private readonly float _fieldOfViewAngle = MathHelper.ToRadians(30);
     public float FieldOfViewAngle => _fieldOfViewAngle;
 
     public GameObjectType Type => GameObjectType.Enemy;
@@ -105,42 +125,42 @@ public class EnemyModel : GameObjectModel, ITarget
         }
     }
 
-    private float _fireDelay = 2f;
+    private readonly float _minFireDelay = 2.5f;
+    private readonly float _maxFireDelay = 5f;
+
+    private float _fireDelay;
     public float FireDelayTimer
     {
         get => _fireDelay;
         set
         {
-            if(_fireDelay <= 0)
+            _fireDelay = value;
+            if (_fireDelay <= 0)
             {
                 _fireDelay = 0;
             }
-            _fireDelay = value;
         }
     }
 
     public bool CanFire => _fireDelay <= 0;
     #endregion
 
-    public EnemyModel(Vector2 position) : base(position)
+    public EnemyModel(int id, Vector2 position) : base(position)
     {
+        _id = id;
+
         _collider = new ColliderModel(AssetsManager.EnemyTexture.Height, AssetsManager.EnemyTexture.Width, 5f, 0.8f);
         for (int i = 0; i < MaxMissileCount; i++)
         {
-            _cooldowns.Add(new MissileCooldownModel(6f));
+            _cooldowns.Add(new MissileCooldownModel(10f));
         }
+
+        _speed = _minSpeed;
     }
 
-    public void SetPosition(Vector2 position)
+    public float ResetRandomFireDelay()
     {
-        _position += position;
-        _collider.UpdateBounds(_position,_rotation);
-    }
-
-    public void SetCurrentSpeed(float speed, bool isEvaiding)
-    {
-        var koeff = isEvaiding ? _evasionKoeff : 1;
-        _currentSpeed = Math.Clamp(_currentSpeed + speed * koeff, _minSpeed, _maxSpeed * koeff);
+        return (float)(_random.NextDouble() * (_maxFireDelay - _minFireDelay) + _minFireDelay);
     }
 
     public void TakeDamage(int damage)
@@ -148,7 +168,6 @@ public class EnemyModel : GameObjectModel, ITarget
         _health -= damage;
         if (_health <= 0)
         {
-            IsTargeted = false;
             Dispose();
         }
     }

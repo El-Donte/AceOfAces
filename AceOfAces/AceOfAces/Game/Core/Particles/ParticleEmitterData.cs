@@ -2,15 +2,15 @@
 
 public struct ParticleEmitterData
 {
-    public ParticleData particleData = new();
-    public float angle = 0f;
-    public float angleVariance = 45f;
-    public float lifespanMin = 0.1f;
-    public float lifespanMax = 2f;
-    public float speedMin = 10f;
-    public float speedMax = 100f;
-    public float interval = 1f;
-    public int emitCount = 1;
+    public ParticleData ParticleData { get; set; } = new();
+    public float Angle { get; set; } = 0f;
+    public float AngleVariance { get; set; } = 45f;
+    public float LifespanMin { get; set; } = 0.1f;
+    public float LifespanMax { get; set; } = 2f;
+    public float SpeedMin { get; set; } = 10f;
+    public float SpeedMax { get; set; } = 100f;
+    public float Interval { get; set; } = 1f;
+    public int EmitCount { get; set; } = 1;
 
     public ParticleEmitterData()
     {

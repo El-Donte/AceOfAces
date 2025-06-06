@@ -16,21 +16,12 @@ public class BackGroundController : IController
         _layers.AddRange(layers);
     }
 
-    public BackGroundController(List<LayerModel> layers)
-    {
-        _layers.AddRange(layers);
-        _player = null;
-    }
-
     public void Update(float deltaTime)
     {
-        var rotation = _player == null ? 1f : _player.Rotation;
-        var speed = _player == null ? 10f : _player.CurrentSpeed;
-
         foreach (var layer in _layers)
         {
-            Vector2 direction = new((float)Math.Sin(rotation), -(float)Math.Cos(rotation));
-            layer.Position += direction * speed * 1.5f * layer.LayerSpeed * deltaTime; 
+            Vector2 direction = new((float)Math.Sin(_player.Rotation), -(float)Math.Cos(_player.Rotation));
+            layer.Position += direction * _player.CurrentSpeed * 1.5f * layer.LayerSpeed * deltaTime; 
         }
     }
 }

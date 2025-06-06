@@ -6,16 +6,16 @@ namespace AceOfAces.Core.Particles;
 
 public struct ParticleData
 {
-    public Texture2D texture = AssetsManager.ParticleTexture;
-    public float lifespan = 1f;
-    public Color colorStart = Color.Yellow;
-    public Color colorEnd = Color.Red;
-    public float opacityStart = 1f;
-    public float opacityEnd = 0f;
-    public float sizeStart = 32f;
-    public float sizeEnd = 4f;
-    public float speed = 10f;
-    public float angle = 0f;
+    public Texture2D Texture { get; } = AssetsManager.ParticleTexture;
+    public float Lifespan { get; set; } = 1f;
+    public Color ColorStart { get; set; } = Color.Yellow;
+    public Color ColorEnd { get; set; } = Color.Red;
+    public float OpacityStart { get; set; } = 1f;
+    public float OpacityEnd { get; set; } = 0f;
+    public float SizeStart { get; set; } = 32f;
+    public float SizeEnd { get; set; } = 4f;
+    public float Speed { get; set; } = 10f;
+    public float Angle { get; set; } = 0f;
 
     public ParticleData(){ }
 }

@@ -5,8 +5,9 @@ namespace AceOfAces.Models;
 public class GameOverModel
 {
     private readonly Button _menuButton;
-    private readonly Button _playAgainButton;
     public Button MenuButton => _menuButton;
+
+    private readonly Button _playAgainButton;
     public Button PlayAgainButton => _playAgainButton;
 
     public bool PlayAgain { get; set; }

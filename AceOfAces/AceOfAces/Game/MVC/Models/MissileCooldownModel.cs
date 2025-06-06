@@ -5,6 +5,7 @@ public class MissileCooldownModel
     private bool _availableToFire = true;
     public bool AvailableToFire => _availableToFire;
 
+    private readonly float _cooldownTime;
     private float _timer;
     public float Timer 
     {
@@ -19,7 +20,6 @@ public class MissileCooldownModel
         }
     }
 
-    private readonly float _cooldownTime;
     public float Progress => _availableToFire ? 1f : 1f - (_timer / _cooldownTime);
 
     public MissileCooldownModel(float cooldownTime)

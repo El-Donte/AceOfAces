@@ -1,7 +1,6 @@
 ﻿using AceOfAces.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Collections.Generic;
 
 namespace AceOfAces.Views;
@@ -20,28 +19,20 @@ public class BackgroundView : IView
         _spriteBatch = spriteBatch;
     }
 
-    public BackgroundView(List<LayerModel> layers, SpriteBatch spriteBatch)
-    {
-        _layers = layers;
-        _player = null;
-        _spriteBatch = spriteBatch;
-    }
-
     public void Draw()
-    {
-        var position = _player == null ? new Vector2(960, 540): _player.Position;
+    {;
         foreach(var layer in _layers)
         {
             _spriteBatch.Draw(
-                layer.Texture, 
-                position,
+                layer.Texture,
+                _player.Position,
                 layer.Bounds, 
                 Color.White,
-                0,
+                0f,
                 layer.Origin,
                 layer.Zoom,
                 SpriteEffects.None,
-                1
+                1f
             );
         }
     }

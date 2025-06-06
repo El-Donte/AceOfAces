@@ -20,11 +20,11 @@ public class StateMachine
         _states[stateName] = state;
     }
 
-    public void Change(string stateName, params object[] args)
+    public void Change(string stateName)
     {
         if (!_states.ContainsKey(stateName))
         {
-            throw new KeyNotFoundException($"{stateName} is not a valid state!");
+            throw new KeyNotFoundException($"{stateName} нет такого состояния!");
         }
 
         if (_currentState != null)
@@ -33,7 +33,14 @@ public class StateMachine
         }
 
         _currentState = _states[stateName];
-        _currentState.Enter(args);
+        _currentState.Enter();
+    }
+    public void Update(float deltaTime)
+    {
+        if (_currentState != null)
+        {
+            _currentState.Update(deltaTime);
+        }
     }
 
     public void Draw()
@@ -41,14 +48,6 @@ public class StateMachine
         if (_currentState != null)
         {
             _currentState.Draw();
-        }
-    }
-
-    public void Update(float deltaTime)
-    {
-        if (_currentState != null)
-        {
-            _currentState.Update(deltaTime);
         }
     }
 }

@@ -9,7 +9,7 @@ public class CollisionController : IController
 {
     private readonly Grid _grid;
     
-    private readonly float collisionCooldownTime = 0.2f;
+    private readonly float _collisionCooldownTime = 0.2f;
     private readonly Dictionary<GameObjectModel, float> _collisionCooldowns = [];
 
     public CollisionController(Grid grid)
@@ -27,13 +27,19 @@ public class CollisionController : IController
     {
         foreach (var objA in _grid.ActiveObjects)
         {
-            if (objA.IsDestroyed) continue;
+            if (objA.IsDestroyed || !objA.Collider.IsEnable)
+            {
+                continue;
+            }
 
             var nearbyObjects = _grid.GetNearbyObjects(objA.Position);
 
             foreach (var objB in nearbyObjects)
             {
-                if (CanSkipCollisionCheck(objA, objB)) continue;
+                if (CanSkipCollisionCheck(objA, objB) || !objB.Collider.IsEnable)
+                {
+                    continue;
+                }
 
                 if (objA.Collider.Bounds.Intersects(objB.Collider.Bounds))
                 {
@@ -58,8 +64,8 @@ public class CollisionController : IController
 
     private void StartCooldown(GameObjectModel a, GameObjectModel b)
     {
-        _collisionCooldowns[a] = collisionCooldownTime;
-        _collisionCooldowns[b] = collisionCooldownTime;
+        _collisionCooldowns[a] = _collisionCooldownTime;
+        _collisionCooldowns[b] = _collisionCooldownTime;
     }
 
     private void UpdateCooldowns(float deltaTime)
@@ -76,6 +82,7 @@ public class CollisionController : IController
 
     private void HandleCollision(GameObjectModel a, GameObjectModel b)
     {
+        TryHandleCollision<MissileModel>(b, a, HandleMissileCollision);
         TryHandleCollision<MissileModel>(a, b, HandleMissileCollision);
         TryHandleCollision<PlayerModel>(a, b, HandlePlayerCollision);
     }
@@ -93,11 +100,6 @@ public class CollisionController : IController
     {
         switch (other)
         {
-            case EnemyModel enemy:
-                player.TakeDamage(1);
-                enemy.TakeDamage(2);
-                break;
-
             case MissileModel missile:
                 HandleMissileCollision(missile, player);
                 break;

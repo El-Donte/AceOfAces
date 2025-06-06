@@ -1,6 +1,4 @@
 ﻿using AceOfAces.Models;
-using System;
-
 
 namespace AceOfAces.Controllers;
 
@@ -15,12 +13,12 @@ public class MenuController : IController
         _model.QuitButton.Click += QuitButtonClicked;
     }
 
-    private void QuitButtonClicked(object sender, EventArgs e)
+    private void QuitButtonClicked()
     {
         _model.Quit = true;
     }
 
-    private void PlayButtonClicked(object sender, EventArgs e)
+    private void PlayButtonClicked()
     {
         _model.Play = true;
     }

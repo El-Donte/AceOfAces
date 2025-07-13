@@ -26,16 +26,16 @@
   <summary>Содержание</summary>
   <ol>
     <li>
-      <a href="#about-the-project">О проекте</a>
+      <a href="#о-проекте">О проекте</a>
       <ul>
-        <li><a href="#built-with">Сделано с помощью/a></li>
+        <li><a href="#сделано-с-помощью">Сделано с помощью/a></li>
       </ul>
     </li>
     <li>
       <a href="#getting-started">Getting Started</a>
     </li>
     <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contact">Контакты</a></li>
+    <li><a href="#контакты">Контакты</a></li>
   </ol>
 </details>
 
